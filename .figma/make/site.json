@@ -1,0 +1,10 @@
+{
+  "description": "Streamline property management with a secure platform for tenant account creation, maintenance requests, financial tracking, and role-based access.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
