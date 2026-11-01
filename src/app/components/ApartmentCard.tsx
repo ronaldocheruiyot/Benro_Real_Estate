@@ -38,7 +38,7 @@ export function ApartmentCard({
   return (
     <div
       className={`bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-all duration-300 ${
-        isSelected ? "ring-4 ring-blue-500 shadow-xl" : "hover:shadow-xl"
+        isSelected ? "ring-4 ring-brand-cyan shadow-xl" : "hover:shadow-xl"
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -62,7 +62,7 @@ export function ApartmentCard({
                 e.stopPropagation();
                 onEdit(apartment);
               }}
-              className="size-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg"
+              className="size-10 bg-brand-navy hover:bg-brand-navy-deep text-white rounded-full flex items-center justify-center shadow-lg"
               title="Edit apartment"
             >
               <Edit className="size-5" />
@@ -84,7 +84,7 @@ export function ApartmentCard({
 
         {/* Selection Indicator */}
         {isSelected && (
-          <div className="absolute top-3 left-3 size-6 bg-blue-500 rounded-full flex items-center justify-center animate-in zoom-in duration-200">
+          <div className="absolute top-3 left-3 size-6 bg-brand-cyan rounded-full flex items-center justify-center animate-in zoom-in duration-200">
             <svg
               className="size-4 text-white"
               fill="none"
@@ -117,7 +117,7 @@ export function ApartmentCard({
             e.stopPropagation();
             onViewTenants(apartment);
           }}
-          className="w-full bg-blue-600 hover:bg-blue-700"
+          className="w-full bg-brand-navy text-white hover:bg-brand-navy-deep"
         >
           View Tenants
         </Button>

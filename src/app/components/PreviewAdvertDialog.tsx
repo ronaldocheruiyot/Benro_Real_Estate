@@ -108,7 +108,7 @@ export function PreviewAdvertDialog({ open, onOpenChange, advertisement }: Previ
 
                 <div className="flex flex-wrap gap-4 text-neutral-700">
                   <div className="flex items-center gap-2">
-                    <span className="capitalize px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
+                    <span className="capitalize px-3 py-1 bg-brand-cyan-soft text-brand-navy rounded-full text-sm">
                       {advertisement.propertyType}
                     </span>
                   </div>
@@ -144,7 +144,7 @@ export function PreviewAdvertDialog({ open, onOpenChange, advertisement }: Previ
                   <div className="grid grid-cols-2 gap-3">
                     {advertisement.amenities.map((amenity) => (
                       <div key={amenity} className="flex items-center gap-2">
-                        <div className="h-2 w-2 bg-blue-600 rounded-full" />
+                        <div className="h-2 w-2 bg-brand-cyan rounded-full" />
                         <span className="text-neutral-700">{amenity}</span>
                       </div>
                     ))}
@@ -208,7 +208,7 @@ export function PreviewAdvertDialog({ open, onOpenChange, advertisement }: Previ
 
               {/* Additional Info */}
               <div className="border rounded-lg p-6 bg-blue-50">
-                <h4 className="text-blue-900 mb-2">💡 Viewing Tips</h4>
+                <h4 className="text-brand-navy mb-2">💡 Viewing Tips</h4>
                 <ul className="text-sm text-blue-800 space-y-1">
                   <li>• Schedule viewings in advance</li>
                   <li>• Ask about move-in dates</li>

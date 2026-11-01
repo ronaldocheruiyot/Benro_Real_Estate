@@ -17,7 +17,7 @@ interface VacantUnitsPageProps {
   units?: { id: string; unitNumber: string }[];
   onAddUnit?: (unit: {
     unitNumber: string;
-    unitType: "bedsitter";
+    unitType: string;
     baseRent: number;
     charges: [];
     status: "vacant";
@@ -159,7 +159,7 @@ export function VacantUnitsPage({
                 </div>
                 <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
                   <span>Potential Monthly Revenue</span>
-                  <span className="text-blue-600">
+                  <span className="text-brand-cyan">
                     ${(vacantUnits.length * 2400).toLocaleString()}
                   </span>
                 </div>

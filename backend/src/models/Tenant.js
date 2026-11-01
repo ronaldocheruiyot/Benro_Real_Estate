@@ -24,6 +24,8 @@ const tenantSchema = new mongoose.Schema(
     },
     idNumber: { type: String, default: "" },
     birthDate: { type: String, default: "" },
+    deposit: { type: Number, default: 0, min: 0 },
+    firstMonthPay: { type: Number, default: 0, min: 0 },
     numberOfRooms: { type: Number },
     waterUnits: { type: Number },
     leftReason: { type: String },

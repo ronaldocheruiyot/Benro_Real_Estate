@@ -199,6 +199,16 @@ export function ActiveTenantsPage({
                     <div className="text-right">
                       <p className="text-muted-foreground">{tenant.unit}</p>
                       <p>${tenant.rentAmount}/mo</p>
+                      {(tenant.deposit || 0) > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          Deposit: ${tenant.deposit!.toLocaleString()}
+                        </p>
+                      )}
+                      {(tenant.firstMonthPay || 0) > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          1st month: ${tenant.firstMonthPay!.toLocaleString()}
+                        </p>
+                      )}
                       {tenant.paymentDeadline && (
                         <p className="text-xs text-muted-foreground mt-1">
                           Due: {new Date(tenant.paymentDeadline).toLocaleDateString()}

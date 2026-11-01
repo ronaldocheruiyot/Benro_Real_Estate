@@ -213,9 +213,9 @@ export function PaymentHistoryPage({
       <Navigation onLogout={onLogout} onNavigate={onNavigate} />
 
       <div className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto p-8">
+        <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <Button
               variant="outline"
               onClick={onBack}
@@ -224,27 +224,30 @@ export function PaymentHistoryPage({
               <ArrowLeft className="size-4" />
               Back to Tenants Overview
             </Button>
-            <div className="flex items-center justify-between">
-              <div>
-                <h1>Payment History - {apartment.name}</h1>
-                <p className="text-neutral-600 mt-1">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <h1 className="break-words text-xl sm:text-2xl lg:text-3xl">
+                  Payment History
+                  <span className="text-neutral-500"> — {apartment.name}</span>
+                </h1>
+                <p className="mt-1 text-sm text-neutral-600 sm:text-base">
                   Track and manage all rent payments
                 </p>
               </div>
-              <div className="flex gap-3">
+              <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-end sm:gap-3">
                 <Button
                   variant="outline"
                   onClick={handleExportExcel}
-                  className="gap-2"
+                  className="w-full justify-center gap-2 sm:w-auto"
                 >
-                  <Download className="size-4" />
+                  <Download className="size-4 shrink-0" />
                   Export to Excel
                 </Button>
                 <Button
                   onClick={() => setIsAddPaymentOpen(true)}
-                  className="bg-green-600 hover:bg-green-700 gap-2"
+                  className="w-full justify-center gap-2 bg-green-600 hover:bg-green-700 sm:w-auto"
                 >
-                  <DollarSign className="size-4" />
+                  <DollarSign className="size-4 shrink-0" />
                   Add Payment
                 </Button>
               </div>
@@ -270,9 +273,9 @@ export function PaymentHistoryPage({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-muted-foreground mb-1">Cash Payments</p>
-                    <p className="text-blue-600">${totalCash.toLocaleString()}</p>
+                    <p className="text-brand-cyan">${totalCash.toLocaleString()}</p>
                   </div>
-                  <Banknote className="size-8 text-blue-600" />
+                  <Banknote className="size-8 text-brand-cyan" />
                 </div>
               </CardContent>
             </Card>
@@ -360,18 +363,34 @@ export function PaymentHistoryPage({
 
           {/* Payment Tabs */}
           <Tabs defaultValue="all" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="all">
-                All Payments ({filteredPayments.length})
+            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 p-1 sm:grid-cols-4">
+              <TabsTrigger
+                value="all"
+                className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center text-xs leading-snug sm:whitespace-nowrap sm:text-sm"
+              >
+                All Payments{" "}
+                <span className="tabular-nums">({filteredPayments.length})</span>
               </TabsTrigger>
-              <TabsTrigger value="unclaimed">
-                Unclaimed ({unclaimedPayments.length})
+              <TabsTrigger
+                value="unclaimed"
+                className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center text-xs leading-snug sm:whitespace-nowrap sm:text-sm"
+              >
+                Unclaimed{" "}
+                <span className="tabular-nums">({unclaimedPayments.length})</span>
               </TabsTrigger>
-              <TabsTrigger value="cash">
-                Cash ({cashPayments.length})
+              <TabsTrigger
+                value="cash"
+                className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center text-xs leading-snug sm:whitespace-nowrap sm:text-sm"
+              >
+                Cash{" "}
+                <span className="tabular-nums">({cashPayments.length})</span>
               </TabsTrigger>
-              <TabsTrigger value="bank">
-                Bank Transfer ({bankTransfers.length})
+              <TabsTrigger
+                value="bank"
+                className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center text-xs leading-snug sm:whitespace-nowrap sm:text-sm"
+              >
+                Bank Transfer{" "}
+                <span className="tabular-nums">({bankTransfers.length})</span>
               </TabsTrigger>
             </TabsList>
 
@@ -437,7 +456,7 @@ export function PaymentHistoryPage({
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Banknote className="size-5 text-blue-600" />
+                    <Banknote className="size-5 text-brand-cyan" />
                     Cash Payments
                   </CardTitle>
                 </CardHeader>
@@ -467,7 +486,7 @@ export function PaymentHistoryPage({
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="size-5 text-blue-600" />
+                    <CreditCard className="size-5 text-brand-cyan" />
                     Bank Transfers
                   </CardTitle>
                 </CardHeader>

@@ -30,6 +30,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { toast } from "sonner";
 import { documentsApi, uploadsApi } from "../api/services";
 import { assetUrl } from "../api/client";
+import { FilePreviewDialog } from "./FilePreviewDialog";
 
 type DocumentType = "lease" | "ownership" | "permit" | "identification" | "other";
 type DocumentCategory = "property" | "tenant" | "general";
@@ -45,6 +46,7 @@ interface Document {
   uploadDate: string;
   size: string;
   fileUrl?: string;
+  mimeType?: string;
   approvalStatus?: "pending" | "approved" | "rejected";
 }
 
@@ -69,6 +71,7 @@ export function DocumentsManagementPage({
   const [filterCategory, setFilterCategory] = useState<DocumentCategory | "all">("all");
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
 
   // Form state for upload
   const [uploadForm, setUploadForm] = useState({
@@ -100,6 +103,7 @@ export function DocumentsManagementPage({
           uploadDate: raw.createdAt ? String(raw.createdAt).slice(0, 10) : "",
           size: raw.size ? `${Math.round(raw.size / 1024)} KB` : "",
           fileUrl: assetUrl(raw.fileUrl),
+          mimeType: raw.mimeType,
           approvalStatus: raw.status,
         }))
       );
@@ -270,7 +274,7 @@ export function DocumentsManagementPage({
           
           <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-blue-500 hover:bg-blue-600">
+              <Button className="bg-brand-navy text-white hover:bg-brand-navy-deep">
                 <Upload className="h-4 w-4 mr-2" />
                 Upload Document
               </Button>
@@ -372,20 +376,20 @@ export function DocumentsManagementPage({
                 )}
 
                 <div>
-                  <Label htmlFor="file">Upload File *</Label>
+                  <Label htmlFor="file">Upload Document or Image *</Label>
                   <Input
                     id="file"
                     type="file"
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.txt"
+                    accept="image/*,.pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.gif,.txt"
                     onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                   />
                   <p className="text-xs text-neutral-500 mt-1">
-                    Accepted: PDF, DOC, DOCX, JPG, PNG (Max 15MB). Files are stored securely on the server.
+                    Accepted: images (JPG, PNG, WEBP, GIF) or documents (PDF, DOC). Max 15MB.
                   </p>
                 </div>
 
                 <Button 
-                  className="w-full bg-blue-500 hover:bg-blue-600"
+                  className="w-full bg-brand-navy text-white hover:bg-brand-navy-deep"
                   onClick={handleUpload}
                 >
                   Upload Document
@@ -547,11 +551,19 @@ export function DocumentsManagementPage({
                       <TableCell>{getStatusBadge(doc.approvalStatus)}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            title="Preview"
+                            disabled={!doc.fileUrl}
+                            onClick={() => setPreviewDoc(doc)}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost">
-                            <Download className="h-4 w-4" />
+                          <Button size="sm" variant="ghost" asChild disabled={!doc.fileUrl}>
+                            <a href={doc.fileUrl} target="_blank" rel="noreferrer" download title="Download">
+                              <Download className="h-4 w-4" />
+                            </a>
                           </Button>
                           <Button 
                             size="sm" 
@@ -570,6 +582,16 @@ export function DocumentsManagementPage({
           </CardContent>
         </Card>
       </div>
+
+      {previewDoc?.fileUrl && (
+        <FilePreviewDialog
+          open={!!previewDoc}
+          onOpenChange={(open) => !open && setPreviewDoc(null)}
+          title={previewDoc.name}
+          fileUrl={previewDoc.fileUrl}
+          mimeType={previewDoc.mimeType}
+        />
+      )}
     </div>
   );
 }

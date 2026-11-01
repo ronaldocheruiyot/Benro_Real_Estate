@@ -211,7 +211,7 @@ export function MaintenanceTasksPage({
       case "pending":
         return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200"><Clock className="h-3 w-3 mr-1" /> Pending</Badge>;
       case "in_progress":
-        return <Badge className="bg-blue-100 text-blue-700 border-blue-200"><Wrench className="h-3 w-3 mr-1" /> In Progress</Badge>;
+        return <Badge className="bg-blue-100 text-brand-navy border-blue-200"><Wrench className="h-3 w-3 mr-1" /> In Progress</Badge>;
       case "completed":
         return <Badge className="bg-green-100 text-green-700 border-green-200"><CheckCircle className="h-3 w-3 mr-1" /> Completed</Badge>;
     }
@@ -222,7 +222,7 @@ export function MaintenanceTasksPage({
       case "low":
         return <Badge variant="outline" className="border-neutral-300 text-neutral-700">Low</Badge>;
       case "medium":
-        return <Badge variant="outline" className="border-blue-300 text-blue-700">Medium</Badge>;
+        return <Badge variant="outline" className="border-blue-300 text-brand-navy">Medium</Badge>;
       case "high":
         return <Badge variant="outline" className="border-orange-300 text-orange-700">High</Badge>;
       case "urgent":
@@ -255,7 +255,7 @@ export function MaintenanceTasksPage({
           {currentUser.permissions.reportMaintenance && (
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-blue-500 hover:bg-blue-600">
+                <Button className="bg-brand-navy text-white hover:bg-brand-navy-deep">
                   <Plus className="h-4 w-4 mr-2" />
                   Report Issue
                 </Button>
@@ -360,7 +360,7 @@ export function MaintenanceTasksPage({
                   </div>
 
                   <Button 
-                    className="w-full bg-blue-500 hover:bg-blue-600"
+                    className="w-full bg-brand-navy text-white hover:bg-brand-navy-deep"
                     onClick={handleCreateTask}
                   >
                     Report Issue
@@ -581,7 +581,7 @@ function TasksTable({
                   <Button 
                     size="sm" 
                     onClick={() => onUpdateStatus(task.id, "in_progress")}
-                    className="bg-blue-500 hover:bg-blue-600"
+                    className="bg-brand-navy text-white hover:bg-brand-navy-deep"
                   >
                     Start
                   </Button>

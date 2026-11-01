@@ -2,15 +2,71 @@
   "name": "benro-desktop",
   "version": "1.0.0",
   "private": true,
+  "description": "BENRO Real Estate — installable Windows desktop app",
+  "author": "BENRO",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "electron ."
+    "dev": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.benro.realestate",
+    "productName": "BENRO Real Estate",
+    "copyright": "Copyright © BENRO",
+    "directories": {
+      "output": "dist-installer"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../dist",
+        "to": "ui"
+      },
+      {
+        "from": "../backend",
+        "to": "backend",
+        "filter": [
+          "**/*",
+          "!uploads/**",
+          "!.env"
+        ]
+      }
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        },
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "BENRO-${version}-${os}-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "BENRO-Portable-${version}.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "BENRO Real Estate",
+      "artifactName": "BENRO-Setup-${version}.exe"
+    },
+    "asar": true
   },
   "devDependencies": {
-    "electron": "^35.0.0"
-  },
-  "dependencies": {
-    "@figma/my-make-file": "file:.."
+    "electron": "^35.0.0",
+    "electron-builder": "^25.1.8"
   }
 }

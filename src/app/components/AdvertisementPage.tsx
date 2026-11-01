@@ -220,7 +220,7 @@ export function AdvertisementPage({ onLogout, onNavigate, currentUser }: Adverti
             <Card>
               <CardContent className="pt-6">
                 <p className="text-neutral-600 mb-1">Total Views</p>
-                <p className="text-blue-600">{stats.totalViews}</p>
+                <p className="text-brand-cyan">{stats.totalViews}</p>
               </CardContent>
             </Card>
             <Card>

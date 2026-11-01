@@ -195,8 +195,8 @@ export function AddUserDialog({
           )}
 
           {/* Info Box */}
-          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 className="text-blue-900 mb-2">📧 What happens next?</h4>
+          <div className="p-4 bg-brand-cyan-soft rounded-lg border border-brand-cyan/30">
+            <h4 className="text-brand-navy mb-2">📧 What happens next?</h4>
             <ul className="text-sm text-blue-800 space-y-1">
               <li>• An auto-generated password will be created</li>
               <li>• Email with login credentials will be sent to the user</li>

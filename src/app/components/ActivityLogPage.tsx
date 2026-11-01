@@ -108,9 +108,9 @@ export function ActivityLogPage({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-muted-foreground mb-1">Active Users</p>
-                    <p className="text-blue-600">{uniqueUsers.length}</p>
+                    <p className="text-brand-cyan">{uniqueUsers.length}</p>
                   </div>
-                  <User className="size-8 text-blue-600" />
+                  <User className="size-8 text-brand-cyan" />
                 </div>
               </CardContent>
             </Card>
@@ -211,8 +211,8 @@ export function ActivityLogPage({
                             <p className="text-muted-foreground mb-2">{log.details}</p>
                             <div className="flex items-center gap-4 text-sm">
                               <div className="flex items-center gap-1">
-                                <User className="size-4 text-blue-600" />
-                                <span className="text-blue-600">{log.userName}</span>
+                                <User className="size-4 text-brand-cyan" />
+                                <span className="text-brand-cyan">{log.userName}</span>
                               </div>
                               <div className="flex items-center gap-1">
                                 <Clock className="size-4 text-neutral-600" />

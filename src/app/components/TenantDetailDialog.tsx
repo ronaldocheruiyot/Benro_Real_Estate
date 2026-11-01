@@ -4,10 +4,33 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Mail, Phone, Home, Calendar, DollarSign, CreditCard, User, Printer, UserPlus, Key } from "lucide-react";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import {
+  Mail,
+  Phone,
+  Home,
+  Calendar,
+  DollarSign,
+  CreditCard,
+  User,
+  Printer,
+  UserPlus,
+  Key,
+  FileText,
+  Upload,
+  ExternalLink,
+  Trash2,
+  Eye,
+  Image as ImageIcon,
+} from "lucide-react";
 import { Tenant, Payment } from "./TenantsPage";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreateTenantAccountDialog } from "./CreateTenantAccountDialog";
+import { FilePreviewDialog, isImagePath, isPdfPath } from "./FilePreviewDialog";
+import { documentsApi } from "../api/services";
+import { assetUrl } from "../api/client";
+import { toast } from "sonner";
 
 interface TenantDetailDialogProps {
   tenant: Tenant;
@@ -17,37 +40,117 @@ interface TenantDetailDialogProps {
   onUpdateTenant?: (updatedTenant: Tenant) => void;
 }
 
-export function TenantDetailDialog({ tenant, open, onOpenChange, payments = [], onUpdateTenant }: TenantDetailDialogProps) {
+type TenantDoc = {
+  id: string;
+  name: string;
+  fileUrl: string;
+  mimeType?: string;
+  category?: string;
+  createdAt?: string;
+  size?: number;
+};
+
+export function TenantDetailDialog({
+  tenant,
+  open,
+  onOpenChange,
+  payments = [],
+  onUpdateTenant,
+}: TenantDetailDialogProps) {
   const [isCreateAccountOpen, setIsCreateAccountOpen] = useState(false);
+  const [docs, setDocs] = useState<TenantDoc[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<TenantDoc | null>(null);
+
+  const loadDocs = async () => {
+    if (!tenant?.id) return;
+    setLoadingDocs(true);
+    try {
+      const rows = await documentsApi.list({ tenantId: tenant.id });
+      setDocs(
+        rows.map((r: any) => ({
+          id: r.id,
+          name: r.name || r.fileName || "File",
+          fileUrl: assetUrl(r.fileUrl),
+          mimeType: r.mimeType,
+          category: r.category,
+          createdAt: r.createdAt,
+          size: r.size,
+        }))
+      );
+    } catch (err: any) {
+      toast.error(err.message || "Failed to load documents");
+    } finally {
+      setLoadingDocs(false);
+    }
+  };
+
+  useEffect(() => {
+    if (open && tenant?.id) loadDocs();
+  }, [open, tenant?.id]);
 
   const handleEmail = () => {
-    console.log("Email tenant:", tenant.email);
-    alert(`Would send email to: ${tenant.email}`);
+    window.location.href = `mailto:${tenant.email}`;
   };
 
   const handleCall = () => {
-    console.log("Call tenant:", tenant.phone);
-    alert(`Would call: ${tenant.phone}`);
+    if (tenant.phone) window.location.href = `tel:${tenant.phone}`;
   };
 
-  // Calculate age from birth date
   const calculateAge = (birthDate: string) => {
+    if (!birthDate) return null;
     const today = new Date();
     const birth = new Date(birthDate);
+    if (Number.isNaN(birth.getTime())) return null;
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
     return age;
   };
 
-  // Get tenant's payment history
-  const tenantPayments = payments.filter(p => p.tenantId === tenant.id);
+  const tenantPayments = payments.filter((p) => p.tenantId === tenant.id);
   const totalPaid = tenantPayments.reduce((sum, p) => sum + p.amount, 0);
+  const age = calculateAge(tenant.birthDate);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("name", file.name);
+        fd.append("category", "id");
+        fd.append("uploadFolder", "documents");
+        fd.append("tenantId", tenant.id);
+        if (tenant.apartmentId) fd.append("apartmentId", tenant.apartmentId);
+        await documentsApi.create(fd);
+      }
+      await loadDocs();
+      toast.success("File(s) uploaded");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleDeleteDoc = async (id: string) => {
+    if (!confirm("Delete this document?")) return;
+    try {
+      await documentsApi.remove(id);
+      await loadDocs();
+      toast.success("Document deleted");
+    } catch (err: any) {
+      toast.error(err.message || "Delete failed");
+    }
+  };
 
   const handlePrintPaymentHistory = () => {
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
     const printContent = `
@@ -57,195 +160,172 @@ export function TenantDetailDialog({ tenant, open, onOpenChange, payments = [], 
           <title>Payment History - ${tenant.name}</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; }
-            h1 { color: #333; }
             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
             th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
             th { background-color: #f3f3f5; }
-            .header { margin-bottom: 30px; }
-            .total { font-weight: bold; margin-top: 20px; }
           </style>
         </head>
         <body>
-          <div class="header">
-            <h1>Payment History</h1>
-            <p><strong>Tenant:</strong> ${tenant.name}</p>
-            <p><strong>Unit:</strong> ${tenant.unit}</p>
-            <p><strong>ID Number:</strong> ${tenant.idNumber}</p>
-            <p><strong>Print Date:</strong> ${new Date().toLocaleDateString()}</p>
-          </div>
+          <h1>Payment History</h1>
+          <p><strong>Tenant:</strong> ${tenant.name}</p>
+          <p><strong>Unit:</strong> ${tenant.unit}</p>
+          <p><strong>ID Number:</strong> ${tenant.idNumber || "N/A"}</p>
+          <p><strong>Deposit:</strong> $${(tenant.deposit || 0).toLocaleString()}</p>
+          <p><strong>First Month Pay:</strong> $${(tenant.firstMonthPay || 0).toLocaleString()}</p>
           <table>
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Method</th>
-                <th>Status</th>
-                <th>Transaction ID</th>
-                <th>Notes</th>
+                <th>Date</th><th>Amount</th><th>Method</th><th>Status</th><th>Notes</th>
               </tr>
             </thead>
             <tbody>
-              ${tenantPayments.map(p => `
+              ${tenantPayments
+                .map(
+                  (p) => `
                 <tr>
                   <td>${new Date(p.date).toLocaleDateString()}</td>
                   <td>$${p.amount.toLocaleString()}</td>
-                  <td>${p.method.replace('_', ' ').toUpperCase()}</td>
+                  <td>${p.method.replace("_", " ").toUpperCase()}</td>
                   <td>${p.status.toUpperCase()}</td>
-                  <td>${p.transactionId || 'N/A'}</td>
-                  <td>${p.notes || 'N/A'}</td>
-                </tr>
-              `).join('')}
+                  <td>${p.notes || "N/A"}</td>
+                </tr>`
+                )
+                .join("")}
             </tbody>
           </table>
-          <p class="total">Total Paid: $${totalPaid.toLocaleString()}</p>
-          <script>
-            window.onload = () => {
-              window.print();
-              window.onafterprint = () => window.close();
-            };
-          </script>
+          <p><strong>Total Paid:</strong> $${totalPaid.toLocaleString()}</p>
+          <script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();};</script>
         </body>
       </html>
     `;
-
     printWindow.document.write(printContent);
     printWindow.document.close();
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Tenant Profile</DialogTitle>
           <DialogDescription>
-            Complete information and payment history for {tenant.name}
+            Details, payments, and documents for {tenant.name}
           </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="profile">Profile Details</TabsTrigger>
-            <TabsTrigger value="payments">Payment History ({tenantPayments.length})</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="payments">Payments ({tenantPayments.length})</TabsTrigger>
+            <TabsTrigger value="documents">Documents ({docs.length})</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile" className="space-y-6 mt-6">
-            {/* Profile Section */}
-            <div className="flex items-center gap-4">
+          <TabsContent value="profile" className="mt-6 space-y-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <Avatar className="size-20">
                 <AvatarImage src={tenant.avatar} />
                 <AvatarFallback>{tenant.name.charAt(0)}</AvatarFallback>
               </Avatar>
-              <div className="flex-1">
-                <h3>{tenant.name}</h3>
+              <div className="min-w-0 flex-1">
+                <h3 className="truncate">{tenant.name}</h3>
                 <p className="text-muted-foreground">{tenant.unit}</p>
+                <p className="text-sm text-muted-foreground">ID: {tenant.idNumber || "Not set"}</p>
               </div>
               <Badge
                 variant={tenant.paymentStatus === "paid" ? "default" : "destructive"}
                 className={tenant.paymentStatus === "paid" ? "bg-green-600" : ""}
               >
-                {tenant.paymentStatus === "paid" ? "Paid" : "Unpaid"}
+                {tenant.paymentStatus === "paid"
+                  ? "Paid"
+                  : tenant.paymentStatus === "partial"
+                    ? "Partial"
+                    : "Unpaid"}
               </Badge>
             </div>
 
             <Separator />
 
-            {/* Personal Information */}
             <div className="space-y-4">
               <h4>Personal Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="flex items-center gap-3">
-                  <User className="size-5 text-blue-600" />
+                  <User className="size-5 text-brand-cyan" />
                   <div>
                     <p className="text-muted-foreground">ID Number</p>
-                    <p>{tenant.idNumber}</p>
+                    <p>{tenant.idNumber || "N/A"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Calendar className="size-5 text-blue-600" />
+                  <Calendar className="size-5 text-brand-cyan" />
                   <div>
                     <p className="text-muted-foreground">Date of Birth</p>
-                    <p>{new Date(tenant.birthDate).toLocaleDateString()} (Age: {calculateAge(tenant.birthDate)})</p>
+                    <p>
+                      {tenant.birthDate
+                        ? `${new Date(tenant.birthDate).toLocaleDateString()}${
+                            age != null ? ` (Age: ${age})` : ""
+                          }`
+                        : "N/A"}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Calendar className="size-5 text-blue-600" />
+                  <Calendar className="size-5 text-brand-cyan" />
                   <div>
                     <p className="text-muted-foreground">Joining Date</p>
-                    <p>{new Date(tenant.joiningDate).toLocaleDateString()}</p>
+                    <p>
+                      {tenant.joiningDate
+                        ? new Date(tenant.joiningDate).toLocaleDateString()
+                        : "N/A"}
+                    </p>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Contact Information */}
-            <div className="space-y-4">
-              <h4>Contact Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3">
-                  <Mail className="size-5 text-blue-600" />
+                  <Mail className="size-5 text-brand-cyan" />
                   <div>
                     <p className="text-muted-foreground">Email</p>
-                    <p>{tenant.email}</p>
+                    <p className="break-all">{tenant.email}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Phone className="size-5 text-blue-600" />
+                  <Phone className="size-5 text-brand-cyan" />
                   <div>
                     <p className="text-muted-foreground">Phone</p>
-                    <p>{tenant.phone}</p>
+                    <p>{tenant.phone || "N/A"}</p>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Lease Information */}
-            <div className="space-y-4">
-              <h4>Lease Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3">
-                  <Home className="size-5 text-blue-600" />
+                  <Home className="size-5 text-brand-cyan" />
                   <div>
                     <p className="text-muted-foreground">Unit</p>
                     <p>{tenant.unit}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Home className="size-5 text-blue-600" />
-                  <div>
-                    <p className="text-muted-foreground">Number of Rooms</p>
-                    <p>{tenant.numberOfRooms || 'N/A'}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <DollarSign className="size-5 text-blue-600" />
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <h4>Payments on Move-in</h4>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="flex items-center gap-3 rounded-lg bg-brand-cyan-soft/50 p-3">
+                  <DollarSign className="size-5 text-brand-cyan" />
                   <div>
                     <p className="text-muted-foreground">Monthly Rent</p>
                     <p>${tenant.rentAmount.toLocaleString()}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <DollarSign className="size-5 text-blue-600" />
+                <div className="flex items-center gap-3 rounded-lg bg-brand-cyan-soft/50 p-3">
+                  <DollarSign className="size-5 text-brand-cyan" />
                   <div>
-                    <p className="text-muted-foreground">Water Units</p>
-                    <p>{tenant.waterUnits || 'N/A'}</p>
+                    <p className="text-muted-foreground">Security Deposit</p>
+                    <p>${(tenant.deposit || 0).toLocaleString()}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Calendar className="size-5 text-blue-600" />
+                <div className="flex items-center gap-3 rounded-lg bg-brand-cyan-soft/50 p-3">
+                  <DollarSign className="size-5 text-brand-cyan" />
                   <div>
-                    <p className="text-muted-foreground">Lease Start</p>
-                    <p>{new Date(tenant.leaseStart).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Calendar className="size-5 text-blue-600" />
-                  <div>
-                    <p className="text-muted-foreground">Lease End</p>
-                    <p>{new Date(tenant.leaseEnd).toLocaleDateString()}</p>
+                    <p className="text-muted-foreground">First Month Pay</p>
+                    <p>${(tenant.firstMonthPay || 0).toLocaleString()}</p>
                   </div>
                 </div>
               </div>
@@ -253,10 +333,9 @@ export function TenantDetailDialog({ tenant, open, onOpenChange, payments = [], 
 
             <Separator />
 
-            {/* Account Status */}
             <div className="space-y-4">
               <h4>Account Status</h4>
-              <div className="flex items-center gap-3 p-4 bg-neutral-50 rounded-lg">
+              <div className="flex items-center gap-3 rounded-lg bg-neutral-50 p-4">
                 {tenant.hasAccount ? (
                   <>
                     <Key className="size-5 text-green-600" />
@@ -271,7 +350,7 @@ export function TenantDetailDialog({ tenant, open, onOpenChange, payments = [], 
                     <Key className="size-5 text-neutral-400" />
                     <div className="flex-1">
                       <p>No Login Account</p>
-                      <p className="text-muted-foreground">Create an account for tenant portal access</p>
+                      <p className="text-muted-foreground">Create an account for portal access</p>
                     </div>
                     <Badge variant="secondary">Inactive</Badge>
                   </>
@@ -279,10 +358,7 @@ export function TenantDetailDialog({ tenant, open, onOpenChange, payments = [], 
               </div>
             </div>
 
-            <Separator />
-
-            {/* Actions */}
-            <div className="flex gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <Button onClick={handleEmail} className="flex-1 gap-2">
                 <Mail className="size-4" />
                 Send Email
@@ -291,15 +367,19 @@ export function TenantDetailDialog({ tenant, open, onOpenChange, payments = [], 
                 <Phone className="size-4" />
                 Call Tenant
               </Button>
-              <Button onClick={() => setIsCreateAccountOpen(true)} variant="outline" className="flex-1 gap-2">
+              <Button
+                onClick={() => setIsCreateAccountOpen(true)}
+                variant="outline"
+                className="flex-1 gap-2"
+              >
                 <UserPlus className="size-4" />
                 Create Account
               </Button>
             </div>
           </TabsContent>
 
-          <TabsContent value="payments" className="space-y-4 mt-6">
-            <div className="flex items-center justify-between mb-4">
+          <TabsContent value="payments" className="mt-6 space-y-4">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h4>Payment History</h4>
                 <p className="text-muted-foreground">Total Paid: ${totalPaid.toLocaleString()}</p>
@@ -313,32 +393,31 @@ export function TenantDetailDialog({ tenant, open, onOpenChange, payments = [], 
             {tenantPayments.length > 0 ? (
               <div className="space-y-3">
                 {tenantPayments.map((payment) => (
-                  <div key={payment.id} className="p-4 border rounded-lg bg-white">
-                    <div className="flex items-center justify-between">
+                  <div key={payment.id} className="rounded-lg border bg-white p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center gap-4">
-                        <div className={`p-3 rounded-lg ${
-                          payment.method === "cash" ? "bg-green-100" : "bg-blue-100"
-                        }`}>
+                        <div
+                          className={`rounded-lg p-3 ${
+                            payment.method === "cash" ? "bg-green-100" : "bg-brand-cyan-soft"
+                          }`}
+                        >
                           <CreditCard className="size-5" />
                         </div>
                         <div>
                           <p className="font-medium">${payment.amount.toLocaleString()}</p>
-                          <p className="text-muted-foreground capitalize">
+                          <p className="capitalize text-muted-foreground">
                             {payment.method.replace("_", " ")}
                           </p>
                           {payment.notes && (
-                            <p className="text-muted-foreground text-sm">{payment.notes}</p>
+                            <p className="text-sm text-muted-foreground">{payment.notes}</p>
                           )}
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-left sm:text-right">
                         <p>{new Date(payment.date).toLocaleDateString()}</p>
-                        {payment.transactionId && (
-                          <p className="text-xs text-muted-foreground">{payment.transactionId}</p>
-                        )}
                         <Badge
                           variant={payment.status === "claimed" ? "default" : "secondary"}
-                          className={payment.status === "claimed" ? "bg-green-600 mt-1" : "mt-1"}
+                          className={payment.status === "claimed" ? "mt-1 bg-green-600" : "mt-1"}
                         >
                           {payment.status}
                         </Badge>
@@ -348,8 +427,113 @@ export function TenantDetailDialog({ tenant, open, onOpenChange, payments = [], 
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="py-8 text-center text-muted-foreground">
                 No payment history available
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="documents" className="mt-6 space-y-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h4>Tenant Documents</h4>
+                <p className="text-sm text-muted-foreground">
+                  Upload documents or images (ID photos, leases, receipts)
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="detail-doc-upload" className="sr-only">
+                  Upload document or image
+                </Label>
+                <Button asChild variant="outline" className="gap-2" disabled={uploading}>
+                  <label htmlFor="detail-doc-upload" className="cursor-pointer">
+                    <Upload className="size-4" />
+                    {uploading ? "Uploading…" : "Upload File"}
+                  </label>
+                </Button>
+                <Input
+                  id="detail-doc-upload"
+                  type="file"
+                  className="hidden"
+                  multiple
+                  accept="image/*,.pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.gif"
+                  onChange={handleUpload}
+                />
+              </div>
+            </div>
+
+            {loadingDocs ? (
+              <p className="py-8 text-center text-muted-foreground">Loading documents…</p>
+            ) : docs.length > 0 ? (
+              <ul className="space-y-2">
+                {docs.map((doc) => {
+                  const image = isImagePath(doc.name || doc.fileUrl, doc.mimeType);
+                  const pdf = isPdfPath(doc.name || doc.fileUrl, doc.mimeType);
+                  return (
+                    <li
+                      key={doc.id}
+                      className="flex items-center justify-between gap-3 rounded-lg border bg-white px-3 py-3"
+                    >
+                      <button
+                        type="button"
+                        className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                        onClick={() => setPreviewDoc(doc)}
+                      >
+                        {image ? (
+                          <img
+                            src={doc.fileUrl}
+                            alt=""
+                            className="size-12 shrink-0 rounded-md border object-cover"
+                          />
+                        ) : (
+                          <div className="rounded-lg bg-brand-cyan-soft p-2">
+                            {pdf ? (
+                              <FileText className="size-4 text-brand-navy" />
+                            ) : (
+                              <ImageIcon className="size-4 text-brand-navy" />
+                            )}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="truncate font-medium">{doc.name}</p>
+                          <p className="text-xs capitalize text-muted-foreground">
+                            {image ? "Image" : pdf ? "PDF" : doc.category || "file"}
+                            {doc.createdAt
+                              ? ` · ${new Date(doc.createdAt).toLocaleDateString()}`
+                              : ""}
+                          </p>
+                        </div>
+                      </button>
+                      <div className="flex shrink-0 items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Preview"
+                          onClick={() => setPreviewDoc(doc)}
+                        >
+                          <Eye className="size-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" asChild>
+                          <a href={doc.fileUrl} target="_blank" rel="noreferrer" title="Open">
+                            <ExternalLink className="size-4" />
+                          </a>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-600"
+                          onClick={() => handleDeleteDoc(doc.id)}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <div className="rounded-lg border border-dashed py-10 text-center text-muted-foreground">
+                No files yet. Upload a document or image to get started.
               </div>
             )}
           </TabsContent>
@@ -361,6 +545,15 @@ export function TenantDetailDialog({ tenant, open, onOpenChange, payments = [], 
         tenant={tenant}
         onUpdateTenant={onUpdateTenant}
       />
+      {previewDoc && (
+        <FilePreviewDialog
+          open={!!previewDoc}
+          onOpenChange={(open) => !open && setPreviewDoc(null)}
+          title={previewDoc.name}
+          fileUrl={previewDoc.fileUrl}
+          mimeType={previewDoc.mimeType}
+        />
+      )}
     </Dialog>
   );
 }

@@ -39,7 +39,8 @@ router.post("/", async (req, res) => {
       recordedBy: req.user._id,
     });
 
-    if (tenant) {
+    const isDeposit = /deposit/i.test(String(notes || ""));
+    if (tenant && !isDeposit) {
       const rent = tenant.rentAmount || 0;
       if (amount >= rent) tenant.paymentStatus = "paid";
       else if (amount > 0) tenant.paymentStatus = "partial";

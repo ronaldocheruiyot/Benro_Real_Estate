@@ -305,8 +305,8 @@ export function FinancialReportsPage({
                   <p className="text-neutral-600 mb-1">Total Payments</p>
                   <p className="text-neutral-900">{statistics.totalPayments}</p>
                 </div>
-                <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <FileText className="h-6 w-6 text-blue-600" />
+                <div className="h-12 w-12 bg-brand-cyan-soft rounded-lg flex items-center justify-center">
+                  <FileText className="h-6 w-6 text-brand-cyan" />
                 </div>
               </div>
             </CardContent>
@@ -541,8 +541,8 @@ export function FinancialReportsPage({
                       <CardContent className="pt-6">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                              <Home className="h-5 w-5 text-blue-600" />
+                            <div className="h-10 w-10 bg-brand-cyan-soft rounded-lg flex items-center justify-center">
+                              <Home className="h-5 w-5 text-brand-cyan" />
                             </div>
                             <div>
                               <p className="text-neutral-900">{property}</p>
@@ -558,7 +558,7 @@ export function FinancialReportsPage({
                         </div>
                         <div className="w-full bg-neutral-200 rounded-full h-2">
                           <div 
-                            className="bg-blue-600 h-2 rounded-full" 
+                            className="bg-brand-cyan h-2 rounded-full" 
                             style={{ width: `${(data.total / statistics.totalRevenue) * 100}%` }}
                           />
                         </div>

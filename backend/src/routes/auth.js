@@ -39,6 +39,43 @@ router.get("/me", requireAuth, async (req, res) => {
   res.json({ user: safe });
 });
 
+router.put("/me", requireAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const { name, email, phone, address, avatar } = req.body;
+
+    if (name !== undefined) {
+      const trimmed = String(name).trim();
+      if (!trimmed) return res.status(400).json({ message: "Name is required" });
+      user.name = trimmed;
+    }
+
+    if (email !== undefined) {
+      const nextEmail = String(email).toLowerCase().trim();
+      if (!nextEmail) return res.status(400).json({ message: "Email is required" });
+      const taken = await User.findOne({ email: nextEmail, _id: { $ne: user._id } });
+      if (taken) return res.status(409).json({ message: "Email already in use" });
+      user.email = nextEmail;
+    }
+
+    if (phone !== undefined) user.phone = String(phone).trim();
+    if (address !== undefined) user.address = String(address).trim();
+    if (avatar !== undefined) user.avatar = String(avatar);
+
+    await user.save();
+
+    const safe = serialize(user);
+    safe.createdDate = user.createdDate
+      ? new Date(user.createdDate).toISOString().split("T")[0]
+      : undefined;
+    res.json({ user: safe });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 router.post("/change-password", requireAuth, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;

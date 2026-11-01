@@ -65,14 +65,14 @@ export function MarkAsLeftDialog({ tenant, open, onOpenChange, onMarkAsLeft }: M
               />
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-blue-900">
+            <div className="bg-brand-cyan-soft border border-brand-cyan/30 rounded-lg p-4">
+              <p className="text-brand-navy">
                 <strong>Tenant:</strong> {tenant.name}
               </p>
-              <p className="text-blue-900">
+              <p className="text-brand-navy">
                 <strong>Unit:</strong> {tenant.unit}
               </p>
-              <p className="text-blue-900">
+              <p className="text-brand-navy">
                 <strong>Leave Date:</strong> {new Date().toLocaleDateString()}
               </p>
             </div>

@@ -10,10 +10,15 @@ for (const folder of ["avatars", "properties", "documents", "maintenance", "insp
   fs.mkdirSync(path.join(uploadRoot, folder), { recursive: true });
 }
 
+const DOC_CATEGORIES = new Set(["lease", "ownership", "permit", "id", "other"]);
+
 const storage = multer.diskStorage({
   destination(req, _file, cb) {
-    const category = (req.params.category || req.body.category || "documents").replace(/[^a-z]/gi, "");
-    const dest = path.join(uploadRoot, category);
+    // Route param / uploadFolder wins. Document categories (id, lease, …) always land in documents/.
+    const raw = req.params.category || req.body.uploadFolder || req.body.category || "documents";
+    let folder = String(raw).replace(/[^a-z]/gi, "") || "documents";
+    if (DOC_CATEGORIES.has(folder)) folder = "documents";
+    const dest = path.join(uploadRoot, folder);
     fs.mkdirSync(dest, { recursive: true });
     cb(null, dest);
   },
@@ -24,12 +29,12 @@ const storage = multer.diskStorage({
 });
 
 function fileFilter(_req, file, cb) {
-  const allowed = /jpeg|jpg|png|gif|webp|pdf|doc|docx|xls|xlsx|txt/;
+  const allowed = /jpeg|jpg|png|gif|webp|bmp|heic|pdf|doc|docx|xls|xlsx|txt/;
   const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
-  if (allowed.test(ext) || allowed.test(file.mimetype)) {
+  if (allowed.test(ext) || allowed.test(file.mimetype) || String(file.mimetype || "").startsWith("image/")) {
     cb(null, true);
   } else {
-    cb(new Error("Unsupported file type"));
+    cb(new Error("Unsupported file type. Use images (JPG, PNG, WEBP, GIF) or documents (PDF, DOC)."));
   }
 }
 

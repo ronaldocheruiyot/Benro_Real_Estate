@@ -33,6 +33,9 @@ export interface UserRole {
   tempPassword: boolean;
   permissions: UserPermissions;
   assignedProperties?: string[]; // Property IDs they can access
+  phone?: string;
+  address?: string;
+  avatar?: string;
 }
 
 export interface UserPermissions {
@@ -219,7 +222,7 @@ export function UserManagementPage({
   const getRoleBadgeColor = (role: UserRole["role"]) => {
     switch (role) {
       case "admin": return "bg-purple-100 text-purple-700";
-      case "manager": return "bg-blue-100 text-blue-700";
+      case "manager": return "bg-blue-100 text-brand-navy";
       case "caretaker": return "bg-green-100 text-green-700";
       case "accountant": return "bg-orange-100 text-orange-700";
     }
@@ -246,7 +249,7 @@ export function UserManagementPage({
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-neutral-900 mb-2 flex items-center gap-3">
-                <Users className="h-8 w-8 text-blue-600" />
+                <Users className="h-8 w-8 text-brand-cyan" />
                 User Management & Roles
               </h1>
               <p className="text-neutral-600">
@@ -270,7 +273,7 @@ export function UserManagementPage({
                     <p className="text-neutral-600 mb-1">Total Users</p>
                     <p className="text-neutral-900">{users.length}</p>
                   </div>
-                  <Users className="h-8 w-8 text-blue-600" />
+                  <Users className="h-8 w-8 text-brand-cyan" />
                 </div>
               </CardContent>
             </Card>
@@ -463,8 +466,8 @@ export function UserManagementPage({
                   Full system access. Can manage all users, properties, tenants, and system settings.
                 </p>
               </div>
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h3 className="text-blue-900 mb-2">📊 Manager</h3>
+              <div className="p-4 bg-brand-cyan-soft rounded-lg">
+                <h3 className="text-brand-navy mb-2">📊 Manager</h3>
                 <p className="text-neutral-700">
                   Manages properties, tenants, payments, and reports. Cannot manage users or delete critical data.
                 </p>

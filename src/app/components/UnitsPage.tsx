@@ -34,7 +34,7 @@ export interface UnitCharge {
 export interface Unit {
   id: string;
   unitNumber: string;
-  unitType: "3-bedroom" | "2-bedroom" | "1-bedroom" | "bedsitter" | "studio";
+  unitType: string;
   baseRent: number;
   charges: UnitCharge[];
   status: "occupied" | "vacant";
@@ -148,8 +148,8 @@ export function UnitsPage({
                   <p className="text-neutral-600 mb-1">Total Units</p>
                   <p className="text-neutral-900">{stats.total}</p>
                 </div>
-                <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Home className="h-6 w-6 text-blue-600" />
+                <div className="h-12 w-12 bg-brand-cyan-soft rounded-lg flex items-center justify-center">
+                  <Home className="h-6 w-6 text-brand-cyan" />
                 </div>
               </div>
             </CardContent>
@@ -234,6 +234,26 @@ export function UnitsPage({
                   <SelectItem value="1-bedroom">1 Bedroom</SelectItem>
                   <SelectItem value="bedsitter">Bedsitter</SelectItem>
                   <SelectItem value="studio">Studio</SelectItem>
+                  {Array.from(
+                    new Set(
+                      units
+                        .map((u) => u.unitType)
+                        .filter(
+                          (t) =>
+                            ![
+                              "3-bedroom",
+                              "2-bedroom",
+                              "1-bedroom",
+                              "bedsitter",
+                              "studio",
+                            ].includes(t)
+                        )
+                    )
+                  ).map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t.replace(/-/g, " ")}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -253,7 +273,7 @@ export function UnitsPage({
                     <div>
                       <CardTitle className="text-neutral-900">{unit.unitNumber}</CardTitle>
                       <p className="text-neutral-600 mt-1 capitalize">
-                        {unit.unitType.replace("-", " ")}
+                        {unit.unitType.replace(/-/g, " ")}
                       </p>
                     </div>
                     <Badge variant={unit.status === "occupied" ? "default" : "secondary"}>

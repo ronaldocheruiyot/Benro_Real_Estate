@@ -16,7 +16,6 @@ interface AddApartmentDialogProps {
 export function AddApartmentDialog({ open, onOpenChange, onAdd }: AddApartmentDialogProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
   const [address, setAddress] = useState("");
   const [units, setUnits] = useState("");
   const [previewImage, setPreviewImage] = useState("");
@@ -40,16 +39,10 @@ export function AddApartmentDialog({ open, onOpenChange, onAdd }: AddApartmentDi
     // Reset form
     setName("");
     setDescription("");
-    setImageUrl("");
     setAddress("");
     setUnits("");
     setPreviewImage("");
     onOpenChange(false);
-  };
-
-  const handleImageUrlChange = (url: string) => {
-    setImageUrl(url);
-    setPreviewImage(url);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,43 +88,24 @@ export function AddApartmentDialog({ open, onOpenChange, onAdd }: AddApartmentDi
                   )}
                 </div>
 
-                {/* Upload Options */}
-                <div className="space-y-3">
-                  <div>
-                    <Label htmlFor="file-upload" className="cursor-pointer">
-                      <div className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-neutral-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
-                        <Upload className="size-5" />
-                        <span>Upload Image</span>
-                      </div>
-                    </Label>
-                    <input
-                      id="file-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                  </div>
-
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-neutral-300" />
+                {/* Upload */}
+                <div className="flex flex-col justify-center space-y-3">
+                  <Label htmlFor="file-upload" className="cursor-pointer">
+                    <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-300 p-4 transition-colors hover:border-brand-cyan hover:bg-brand-cyan-soft">
+                      <Upload className="size-5" />
+                      <span>Upload Image</span>
                     </div>
-                    <div className="relative flex justify-center">
-                      <span className="bg-white px-2 text-neutral-500">or</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="image-url">Image URL</Label>
-                    <Input
-                      id="image-url"
-                      type="url"
-                      placeholder="https://example.com/image.jpg"
-                      value={imageUrl}
-                      onChange={(e) => handleImageUrlChange(e.target.value)}
-                    />
-                  </div>
+                  </Label>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <p className="text-center text-xs text-muted-foreground">
+                    JPG, PNG, or WEBP
+                  </p>
                 </div>
               </div>
             </div>
@@ -194,7 +168,7 @@ export function AddApartmentDialog({ open, onOpenChange, onAdd }: AddApartmentDi
             >
               Cancel
             </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" className="bg-brand-navy text-white hover:bg-brand-navy-deep">
               Add Apartment
             </Button>
           </DialogFooter>

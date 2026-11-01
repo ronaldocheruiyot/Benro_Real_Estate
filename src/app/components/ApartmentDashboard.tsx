@@ -4,9 +4,19 @@ import { ApartmentCard, Apartment } from "./ApartmentCard";
 import { AddApartmentDialog } from "./AddApartmentDialog";
 import { EditApartmentDialog } from "./EditApartmentDialog";
 import { Button } from "./ui/button";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
-import { Plus, Building2, Settings, Info } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
+import { Plus } from "lucide-react";
 import { UserRole } from "./UserManagementPage";
+import { toast } from "sonner";
 
 interface ApartmentDashboardProps {
   onLogout: () => void;
@@ -24,24 +34,45 @@ export function ApartmentDashboard({ onLogout, onNavigate, onViewTenants, apartm
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [apartmentToEdit, setApartmentToEdit] = useState<Apartment | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [apartmentToDelete, setApartmentToDelete] = useState<Apartment | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Check permissions
   const canEdit = currentUser?.permissions?.manageProperties !== false;
   const canDelete = currentUser?.permissions?.deleteData !== false;
   const canAdd = currentUser?.permissions?.manageProperties !== false;
 
-  const handleDelete = async (id: string) => {
-    if (onPersistDeleteApartment) {
-      await onPersistDeleteApartment(id);
-    } else {
-      const newApartments = apartments.filter((apt) => apt.id !== id);
-      await onApartmentsChange(newApartments);
+  const requestDelete = (id: string) => {
+    const apt = apartments.find((a) => a.id === id) || null;
+    setApartmentToDelete(apt);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!apartmentToDelete) return;
+    setDeleting(true);
+    try {
+      if (onPersistDeleteApartment) {
+        await onPersistDeleteApartment(apartmentToDelete.id);
+      } else {
+        await onApartmentsChange(apartments.filter((apt) => apt.id !== apartmentToDelete.id));
+      }
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(apartmentToDelete.id);
+        return next;
+      });
+      toast.success("Apartment deleted", {
+        description: `"${apartmentToDelete.name}" and its linked data were removed.`,
+      });
+      setDeleteDialogOpen(false);
+      setApartmentToDelete(null);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to delete apartment");
+    } finally {
+      setDeleting(false);
     }
-    setSelectedIds((prev) => {
-      const newSet = new Set(prev);
-      newSet.delete(id);
-      return newSet;
-    });
   };
 
   const handleSelect = (id: string) => {
@@ -89,7 +120,7 @@ export function ApartmentDashboard({ onLogout, onNavigate, onViewTenants, apartm
   };
 
   return (
-    <div className="size-full flex flex-col bg-neutral-50">
+    <div className="size-full flex flex-col bg-brand-cyan-soft/40">
       {/* Navigation */}
       <Navigation onLogout={onLogout} onNavigate={onNavigate} currentView="dashboard" currentUser={currentUser} />
 
@@ -99,15 +130,15 @@ export function ApartmentDashboard({ onLogout, onNavigate, onViewTenants, apartm
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1>Available Houses</h1>
-              <p className="text-neutral-600 mt-1">
+              <h1 className="text-brand-navy">Available Houses</h1>
+              <p className="text-brand-navy/60 mt-1">
                 Manage your apartment properties
               </p>
             </div>
             {canAdd && (
               <Button
                 onClick={() => setIsAddDialogOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700 gap-2"
+                className="gap-2 bg-brand-navy text-white hover:bg-brand-navy-deep"
               >
                 <Plus className="size-5" />
                 Add Apartment
@@ -121,7 +152,7 @@ export function ApartmentDashboard({ onLogout, onNavigate, onViewTenants, apartm
               <ApartmentCard
                 key={apartment.id}
                 apartment={apartment}
-                onDelete={handleDelete}
+                onDelete={requestDelete}
                 isSelected={selectedIds.has(apartment.id)}
                 onSelect={handleSelect}
                 onViewTenants={onViewTenants}
@@ -135,7 +166,7 @@ export function ApartmentDashboard({ onLogout, onNavigate, onViewTenants, apartm
           {apartments.length === 0 && (
             <div className="text-center py-20">
               <p className="text-neutral-500 mb-4">No apartments available</p>
-              <Button onClick={() => setIsAddDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+              <Button onClick={() => setIsAddDialogOpen(true)} className="bg-brand-navy text-white hover:bg-brand-navy-deep">
                 <Plus className="size-5 mr-2" />
                 Add Your First Apartment
               </Button>
@@ -161,6 +192,43 @@ export function ApartmentDashboard({ onLogout, onNavigate, onViewTenants, apartm
         }}
         onSave={handleSaveEdit}
       />
+
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) setApartmentToDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this apartment?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <span className="block">
+                You are about to permanently delete{" "}
+                <strong>“{apartmentToDelete?.name}”</strong>.
+              </span>
+              <span className="block text-red-700">
+                This can remove linked units, tenants, payments, and documents for this
+                property. This action cannot be undone.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void handleDeleteConfirm();
+              }}
+              disabled={deleting}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              {deleting ? "Deleting…" : "Yes, delete apartment"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

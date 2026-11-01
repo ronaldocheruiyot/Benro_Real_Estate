@@ -93,7 +93,7 @@ export function NotificationDropdown() {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <button className="relative inline-flex items-center justify-center size-10 rounded-md text-white hover:bg-blue-700 transition-colors">
+        <button className="relative inline-flex items-center justify-center size-10 rounded-md text-white hover:bg-white/10 transition-colors">
           <Bell className="size-5" />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 size-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs">

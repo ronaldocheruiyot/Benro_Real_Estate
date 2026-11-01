@@ -210,7 +210,7 @@ export function TenantsByApartmentPage({
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                  <Users className="h-8 w-8 text-brand-cyan mx-auto mb-2" />
                   <p className="text-2xl text-neutral-900">{filteredTenants.length}</p>
                   <p className="text-sm text-neutral-600">Total Tenants</p>
                 </div>
@@ -252,14 +252,14 @@ export function TenantsByApartmentPage({
 
           {/* Current Selection Info */}
           {selectedApartmentId !== "all" && selectedApartment && (
-            <Card className="mb-6 bg-blue-50 border-blue-200">
+            <Card className="mb-6 bg-brand-cyan-soft border-brand-cyan/30">
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
-                  <Home className="h-5 w-5 text-blue-600 mt-1" />
+                  <Home className="h-5 w-5 text-brand-cyan mt-1" />
                   <div className="flex-1">
-                    <h3 className="text-blue-900">{selectedApartment.name}</h3>
-                    <p className="text-sm text-blue-700 mt-1">{selectedApartment.description}</p>
-                    <p className="text-sm text-blue-600 mt-2">
+                    <h3 className="text-brand-navy">{selectedApartment.name}</h3>
+                    <p className="text-sm text-brand-navy mt-1">{selectedApartment.description}</p>
+                    <p className="text-sm text-brand-cyan mt-2">
                       {filteredTenants.length} active tenant{filteredTenants.length !== 1 ? 's' : ''} in this property
                     </p>
                   </div>

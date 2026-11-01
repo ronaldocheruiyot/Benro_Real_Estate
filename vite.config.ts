@@ -5,6 +5,8 @@ import react from '@vitejs/plugin-react'
 import packageAliases from './.figma/make/migrated-package-aliases.json'
 
 export default defineConfig({
+  // Relative base so Electron can load dist/index.html without a web server
+  base: './',
   plugins: [
     react(),
     tailwindcss(),

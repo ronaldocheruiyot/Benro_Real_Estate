@@ -61,8 +61,8 @@ export function SetDeadlineDialog({ tenant, open, onOpenChange, onSetDeadline }:
               />
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-blue-900">
+            <div className="bg-brand-cyan-soft border border-brand-cyan/30 rounded-lg p-4">
+              <p className="text-brand-navy">
                 💡 Tip: The tenant will receive an email notification about the new deadline.
               </p>
             </div>
@@ -76,7 +76,7 @@ export function SetDeadlineDialog({ tenant, open, onOpenChange, onSetDeadline }:
             >
               Cancel
             </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" className="bg-brand-navy text-white hover:bg-brand-navy-deep">
               Set Deadline
             </Button>
           </DialogFooter>

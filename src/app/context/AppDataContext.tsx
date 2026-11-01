@@ -44,6 +44,7 @@ type AppDataContextValue = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   refreshAll: () => Promise<void>;
+  updateProfile: (data: Partial<UserRole>) => Promise<UserRole>;
   setApartments: (next: Apartment[] | ((prev: Apartment[]) => Apartment[])) => void;
   setTenants: (next: Tenant[] | ((prev: Tenant[]) => Tenant[])) => void;
   setUnits: (next: Unit[] | ((prev: Unit[]) => Unit[])) => void;
@@ -156,6 +157,21 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setUsersState([]);
   }, []);
 
+  const updateProfile = useCallback(async (data: Partial<UserRole>) => {
+    const { user } = await authApi.updateProfile(data);
+    const normalized = {
+      ...user,
+      permissions: user.permissions || defaultPermissionsByRole[user.role],
+    };
+    const token = getToken();
+    if (token) setSession(token, normalized);
+    setCurrentUser(normalized);
+    setUsersState((prev) =>
+      prev.map((u) => (u.id === normalized.id ? { ...u, ...normalized } : u))
+    );
+    return normalized;
+  }, []);
+
   const saveApartment = useCallback(
     async (data: Partial<Apartment> & { name: string }, id?: string) => {
       const saved = id
@@ -261,6 +277,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       refreshAll,
+      updateProfile,
       setApartments: (next) => setApartmentsState((prev) => resolveNext(next, prev)),
       setTenants: (next) => setTenantsState((prev) => resolveNext(next, prev)),
       setUnits: (next) => setUnitsState((prev) => resolveNext(next, prev)),
@@ -290,6 +307,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       refreshAll,
+      updateProfile,
       saveApartment,
       deleteApartment,
       saveTenant,

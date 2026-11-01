@@ -7,7 +7,7 @@ export function UnitsGuide() {
     <Card className="mb-6">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Info className="h-5 w-5 text-blue-600" />
+          <Info className="h-5 w-5 text-brand-cyan" />
           Units Management Guide
         </CardTitle>
       </CardHeader>
@@ -22,14 +22,14 @@ export function UnitsGuide() {
         <div className="space-y-4">
           <div className="flex gap-3">
             <div className="flex-shrink-0">
-              <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Home className="h-5 w-5 text-blue-600" />
+              <div className="h-10 w-10 bg-brand-cyan-soft rounded-lg flex items-center justify-center">
+                <Home className="h-5 w-5 text-brand-cyan" />
               </div>
             </div>
             <div>
               <h4 className="text-neutral-900 mb-1">1. Define Unit Properties</h4>
               <p className="text-neutral-600">
-                Set unit type (3-bedroom, 2-bedroom, 1-bedroom, bedsitter, or studio), 
+                Set unit type (presets or add your own custom type), 
                 floor number, and square footage for each unit.
               </p>
             </div>
@@ -92,7 +92,7 @@ export function UnitsGuide() {
           </div>
         </div>
 
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="mt-6 p-4 bg-brand-cyan-soft border border-brand-cyan/30 rounded-lg">
           <p className="text-neutral-900 mb-2">💡 <strong>Pro Tip:</strong></p>
           <p className="text-neutral-700">
             Link units to tenants by assigning tenants to specific units. This automatically 

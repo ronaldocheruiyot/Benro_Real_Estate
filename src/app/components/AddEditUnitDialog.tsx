@@ -16,9 +16,29 @@ interface AddEditUnitDialogProps {
   unit?: Unit | null;
 }
 
+const PRESET_UNIT_TYPES = [
+  "3-bedroom",
+  "2-bedroom",
+  "1-bedroom",
+  "bedsitter",
+  "studio",
+] as const;
+
+function slugifyCustomType(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 export function AddEditUnitDialog({ open, onOpenChange, onSave, unit }: AddEditUnitDialogProps) {
   const [unitNumber, setUnitNumber] = useState("");
-  const [unitType, setUnitType] = useState<"3-bedroom" | "2-bedroom" | "1-bedroom" | "bedsitter" | "studio">("2-bedroom");
+  const [unitType, setUnitType] = useState("2-bedroom");
+  const [customUnitType, setCustomUnitType] = useState("");
+  const [useCustomType, setUseCustomType] = useState(false);
   const [baseRent, setBaseRent] = useState("");
   const [floor, setFloor] = useState("");
   const [squareFeet, setSquareFeet] = useState("");
@@ -31,7 +51,16 @@ export function AddEditUnitDialog({ open, onOpenChange, onSave, unit }: AddEditU
   useEffect(() => {
     if (unit) {
       setUnitNumber(unit.unitNumber);
-      setUnitType(unit.unitType);
+      const isPreset = PRESET_UNIT_TYPES.includes(unit.unitType as (typeof PRESET_UNIT_TYPES)[number]);
+      if (isPreset) {
+        setUnitType(unit.unitType);
+        setUseCustomType(false);
+        setCustomUnitType("");
+      } else {
+        setUnitType("custom");
+        setUseCustomType(true);
+        setCustomUnitType(unit.unitType.replace(/-/g, " "));
+      }
       setBaseRent(unit.baseRent.toString());
       setFloor(unit.floor?.toString() || "");
       setSquareFeet(unit.squareFeet?.toString() || "");
@@ -44,6 +73,8 @@ export function AddEditUnitDialog({ open, onOpenChange, onSave, unit }: AddEditU
   const resetForm = () => {
     setUnitNumber("");
     setUnitType("2-bedroom");
+    setCustomUnitType("");
+    setUseCustomType(false);
     setBaseRent("");
     setFloor("");
     setSquareFeet("");
@@ -79,9 +110,16 @@ export function AddEditUnitDialog({ open, onOpenChange, onSave, unit }: AddEditU
   const handleSave = () => {
     if (!unitNumber.trim() || !baseRent) return;
 
+    const resolvedType = useCustomType
+      ? slugifyCustomType(customUnitType) || customUnitType.trim()
+      : unitType;
+
+    if (!resolvedType) return;
+    if (useCustomType && !customUnitType.trim()) return;
+
     const unitData = {
       unitNumber: unitNumber.trim(),
-      unitType,
+      unitType: resolvedType,
       baseRent: parseFloat(baseRent),
       charges,
       floor: floor ? parseInt(floor) : undefined,
@@ -134,9 +172,21 @@ export function AddEditUnitDialog({ open, onOpenChange, onSave, unit }: AddEditU
                 />
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="unitType">Unit Type *</Label>
-                <Select value={unitType} onValueChange={(value: any) => setUnitType(value)}>
+                <Select
+                  value={useCustomType ? "custom" : unitType}
+                  onValueChange={(value) => {
+                    if (value === "custom") {
+                      setUseCustomType(true);
+                      setUnitType("custom");
+                    } else {
+                      setUseCustomType(false);
+                      setUnitType(value);
+                      setCustomUnitType("");
+                    }
+                  }}
+                >
                   <SelectTrigger id="unitType">
                     <SelectValue />
                   </SelectTrigger>
@@ -146,8 +196,19 @@ export function AddEditUnitDialog({ open, onOpenChange, onSave, unit }: AddEditU
                     <SelectItem value="1-bedroom">1 Bedroom</SelectItem>
                     <SelectItem value="bedsitter">Bedsitter</SelectItem>
                     <SelectItem value="studio">Studio</SelectItem>
+                    <SelectItem value="custom">Other — add your own…</SelectItem>
                   </SelectContent>
                 </Select>
+                {useCustomType && (
+                  <Input
+                    id="customUnitType"
+                    placeholder="e.g., Penthouse, Shop, Maisonette"
+                    value={customUnitType}
+                    onChange={(e) => setCustomUnitType(e.target.value)}
+                    className="mt-1"
+                    autoFocus
+                  />
+                )}
               </div>
 
               <div>
@@ -302,7 +363,7 @@ export function AddEditUnitDialog({ open, onOpenChange, onSave, unit }: AddEditU
           </div>
 
           {/* Total Summary */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-brand-cyan-soft border border-brand-cyan/30 rounded-lg p-4">
             <div className="flex justify-between items-center mb-2">
               <span className="text-neutral-700">Base Rent:</span>
               <span className="text-neutral-900">${parseFloat(baseRent || "0").toLocaleString()}</span>

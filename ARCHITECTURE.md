@@ -22,7 +22,8 @@ Benro_Real_Estate/
 | **Backend** | `backend/` | `npm run backend` | `5000` |
 | **Frontend** | `src/` (root) | `npm run frontend` | `5173` |
 
-Optional desktop (same frontend, different window): `npm run desktop`
+Optional desktop (offline-capable Electron window): `npm run desktop:offline`  
+— packs the UI into `dist/`, starts local backend, no browser/internet required (local MongoDB still needed).
 
 ## Data flow
 

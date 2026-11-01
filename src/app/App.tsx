@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { LoginForm } from "./components/LoginForm";
 import { BrandLogo } from "./components/BrandLogo";
 import { ApartmentDashboard } from "./components/ApartmentDashboard";
@@ -20,30 +19,14 @@ import { HousesManagementPage } from "./components/HousesManagementPage";
 import { TenantsByApartmentPage } from "./components/TenantsByApartmentPage";
 import { CaretakerDashboardPage } from "./components/CaretakerDashboardPage";
 import { LandManagementPage } from "./components/LandManagementPage";
+import { PaymentsManagementPage } from "./components/PaymentsManagementPage";
 import { Toaster } from "./components/ui/sonner";
 import { Apartment } from "./components/ApartmentCard";
 import { AppDataProvider, useAppData } from "./context/AppDataContext";
 import { toast } from "sonner";
+import { useBrowserHistoryNav, type AppView } from "./hooks/useBrowserHistoryNav";
 
-type View =
-  | "dashboard"
-  | "profile"
-  | "settings"
-  | "help"
-  | "tenants"
-  | "activeTenants"
-  | "failedToPay"
-  | "tenantsLeft"
-  | "vacantUnits"
-  | "paymentHistory"
-  | "activityLog"
-  | "units"
-  | "financialReports"
-  | "userManagement"
-  | "advertisements"
-  | "houses"
-  | "tenantsByApartment"
-  | "landManagement";
+type View = AppView;
 
 function AppShell() {
   const {
@@ -72,22 +55,20 @@ function AppShell() {
     setUsers,
   } = useAppData();
 
-  const [currentView, setCurrentView] = useState<View>("dashboard");
-  const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null);
+  const { currentView, selectedApartment, navigate, resetToDashboard } =
+    useBrowserHistoryNav(apartments);
 
   const handleLogout = () => {
     logout();
-    setCurrentView("dashboard");
-    setSelectedApartment(null);
+    resetToDashboard();
   };
 
   const handleViewTenants = (apartment: Apartment) => {
-    setSelectedApartment(apartment);
-    setCurrentView("tenants");
+    navigate("tenants", { apartment });
   };
 
   const handleNavigateToSubPage = (view: View) => {
-    setCurrentView(view);
+    navigate(view, { apartment: selectedApartment });
   };
 
   const handleApartmentsChange = async (newApartments: Apartment[]) => {
@@ -106,7 +87,7 @@ function AppShell() {
       }
       for (const apt of added) {
         if (apartments.find((a) => a.id === apt.id)) continue;
-        // local-only ids from old UI (timestamp) — create on server
+        // local-only ids from old UI (timestamp) ? create on server
         if (!apartments.some((a) => a.id === apt.id)) {
           const { id: _id, ...rest } = apt;
           await saveApartment(rest as Apartment);
@@ -133,8 +114,7 @@ function AppShell() {
   };
 
   const handleConfigureUnits = (apartment: Apartment) => {
-    setSelectedApartment(apartment);
-    setCurrentView("units");
+    navigate("units", { apartment });
   };
 
   const vacantUnits = units
@@ -145,7 +125,7 @@ function AppShell() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-brand-cyan-soft/40">
         <div className="rounded-2xl border bg-white px-8 py-6 shadow-lg text-brand-navy">
-          Connecting to BENRO database…
+          Connecting to BENRO database...
         </div>
         <Toaster position="top-right" />
       </div>
@@ -159,7 +139,7 @@ function AppShell() {
           <>
             <CaretakerDashboardPage
               onLogout={handleLogout}
-              onNavigate={setCurrentView}
+              onNavigate={navigate}
               currentUser={currentUser}
             />
             <Toaster position="top-right" />
@@ -169,7 +149,7 @@ function AppShell() {
       if (currentView === "profile") {
         return (
           <>
-            <ProfilePage onLogout={handleLogout} onNavigate={setCurrentView} currentUser={currentUser} />
+            <ProfilePage onLogout={handleLogout} onNavigate={navigate} currentUser={currentUser} />
             <Toaster position="top-right" />
           </>
         );
@@ -177,7 +157,7 @@ function AppShell() {
       if (currentView === "settings") {
         return (
           <>
-            <SettingsPage onLogout={handleLogout} onNavigate={setCurrentView} currentUser={currentUser} />
+            <SettingsPage onLogout={handleLogout} onNavigate={navigate} currentUser={currentUser} />
             <Toaster position="top-right" />
           </>
         );
@@ -185,7 +165,7 @@ function AppShell() {
       if (currentView === "help") {
         return (
           <>
-            <HelpSupportPage onLogout={handleLogout} onNavigate={setCurrentView} currentUser={currentUser} />
+            <HelpSupportPage onLogout={handleLogout} onNavigate={navigate} currentUser={currentUser} />
             <Toaster position="top-right" />
           </>
         );
@@ -194,7 +174,7 @@ function AppShell() {
         <>
           <CaretakerDashboardPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
+            onNavigate={navigate}
             currentUser={currentUser}
           />
           <Toaster position="top-right" />
@@ -220,7 +200,7 @@ function AppShell() {
         {currentView === "dashboard" && (
           <ApartmentDashboard
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
+            onNavigate={navigate}
             onViewTenants={handleViewTenants}
             apartments={apartments}
             onApartmentsChange={handleApartmentsChange}
@@ -236,20 +216,31 @@ function AppShell() {
           />
         )}
         {currentView === "profile" && (
-          <ProfilePage onLogout={handleLogout} onNavigate={setCurrentView} currentUser={currentUser} />
+          <ProfilePage onLogout={handleLogout} onNavigate={navigate} currentUser={currentUser} />
         )}
         {currentView === "settings" && (
-          <SettingsPage onLogout={handleLogout} onNavigate={setCurrentView} currentUser={currentUser} />
+          <SettingsPage onLogout={handleLogout} onNavigate={navigate} currentUser={currentUser} />
+        )}
+        {currentView === "payments" && (
+          <PaymentsManagementPage
+            onLogout={handleLogout}
+            onNavigate={navigate}
+            currentUser={currentUser as any}
+            apartments={apartments}
+            tenants={tenants}
+            payments={payments}
+            setPayments={setPayments}
+          />
         )}
         {currentView === "help" && (
-          <HelpSupportPage onLogout={handleLogout} onNavigate={setCurrentView} currentUser={currentUser} />
+          <HelpSupportPage onLogout={handleLogout} onNavigate={navigate} currentUser={currentUser} />
         )}
         {currentView === "tenants" && (
           <TenantsPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
+            onNavigate={navigate}
             apartment={selectedApartment || undefined}
-            onBack={() => setCurrentView("dashboard")}
+            onBack={() => navigate("dashboard")}
             tenants={apartmentTenants}
             setTenants={async (next) => {
               const list = typeof next === "function" ? next(apartmentTenants) : next;
@@ -268,7 +259,7 @@ function AppShell() {
               }
               for (const old of apartmentTenants) {
                 if (!list.find((t) => t.id === old.id)) {
-                  // deleted locally — ignore unless explicit delete API used
+                  // deleted locally ? ignore unless explicit delete API used
                 }
               }
               await refreshAll();
@@ -281,9 +272,9 @@ function AppShell() {
         {currentView === "activeTenants" && selectedApartment && (
           <ActiveTenantsPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
+            onNavigate={navigate}
             apartment={selectedApartment}
-            onBack={() => setCurrentView("tenants")}
+            onBack={() => navigate("tenants", { apartment: selectedApartment })}
             tenants={apartmentTenants}
             setTenants={async (next) => {
               const list = typeof next === "function" ? next(apartmentTenants) : next;
@@ -322,9 +313,9 @@ function AppShell() {
         {currentView === "failedToPay" && selectedApartment && (
           <FailedToPayPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
+            onNavigate={navigate}
             apartment={selectedApartment}
-            onBack={() => setCurrentView("tenants")}
+            onBack={() => navigate("tenants", { apartment: selectedApartment })}
             tenants={apartmentTenants}
             setTenants={async (next) => {
               const list = typeof next === "function" ? next(apartmentTenants) : next;
@@ -341,9 +332,9 @@ function AppShell() {
         {currentView === "tenantsLeft" && selectedApartment && (
           <TenantsLeftPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
+            onNavigate={navigate}
             apartment={selectedApartment}
-            onBack={() => setCurrentView("tenants")}
+            onBack={() => navigate("tenants", { apartment: selectedApartment })}
             tenants={apartmentTenants}
             setTenants={async (next) => {
               const list = typeof next === "function" ? next(apartmentTenants) : next;
@@ -360,9 +351,9 @@ function AppShell() {
         {currentView === "vacantUnits" && selectedApartment && (
           <VacantUnitsPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
+            onNavigate={navigate}
             apartment={selectedApartment}
-            onBack={() => setCurrentView("tenants")}
+            onBack={() => navigate("tenants", { apartment: selectedApartment })}
             vacantUnits={vacantUnits}
             setVacantUnits={() => {}}
             units={apartmentUnits}
@@ -375,9 +366,9 @@ function AppShell() {
         {currentView === "paymentHistory" && selectedApartment && (
           <PaymentHistoryPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
+            onNavigate={navigate}
             apartment={selectedApartment}
-            onBack={() => setCurrentView("tenants")}
+            onBack={() => navigate("tenants", { apartment: selectedApartment })}
             tenants={apartmentTenants}
             payments={apartmentPayments}
             setPayments={async (next) => {
@@ -400,18 +391,18 @@ function AppShell() {
         {currentView === "activityLog" && selectedApartment && (
           <ActivityLogPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
+            onNavigate={navigate}
             apartment={selectedApartment}
-            onBack={() => setCurrentView("tenants")}
+            onBack={() => navigate("tenants", { apartment: selectedApartment })}
             activityLogs={apartmentLogs}
           />
         )}
         {currentView === "units" && selectedApartment && (
           <UnitsPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
+            onNavigate={navigate}
             apartment={selectedApartment}
-            onBack={() => setCurrentView("houses")}
+            onBack={() => navigate("houses")}
             units={apartmentUnits}
             setUnits={async (next) => {
               const list = typeof next === "function" ? next(apartmentUnits) : next;
@@ -438,8 +429,8 @@ function AppShell() {
         {currentView === "financialReports" && (
           <FinancialReportsPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
-            onBack={() => setCurrentView("profile")}
+            onNavigate={navigate}
+            onBack={() => navigate("profile")}
             apartments={apartments}
             payments={payments}
             currentUser={currentUser}
@@ -448,7 +439,7 @@ function AppShell() {
         {currentView === "userManagement" && (
           <UserManagementPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
+            onNavigate={navigate}
             apartments={apartments}
             currentUser={currentUser}
             users={users}
@@ -475,14 +466,14 @@ function AppShell() {
         {currentView === "advertisements" && (
           <AdvertisementPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
+            onNavigate={navigate}
             currentUser={currentUser}
           />
         )}
         {currentView === "houses" && (
           <HousesManagementPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
+            onNavigate={navigate}
             apartments={apartments}
             onApartmentsChange={handleApartmentsChange}
             onPersistApartment={async (data, id) => {
@@ -500,8 +491,8 @@ function AppShell() {
         {currentView === "tenantsByApartment" && (
           <TenantsByApartmentPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
-            onBack={() => setCurrentView("tenants")}
+            onNavigate={navigate}
+            onBack={() => navigate("tenants", { apartment: selectedApartment })}
             apartments={apartments}
             tenants={tenants}
             setTenants={setTenants}
@@ -515,7 +506,7 @@ function AppShell() {
         {currentView === "landManagement" && (
           <LandManagementPage
             onLogout={handleLogout}
-            onNavigate={setCurrentView}
+            onNavigate={navigate}
             currentUser={currentUser}
           />
         )}
@@ -542,10 +533,30 @@ function AppShell() {
           </p>
         </div>
 
-        <div className="relative flex w-full items-center justify-center overflow-x-hidden overflow-y-auto bg-brand-cyan-soft/50 p-5 sm:p-8 lg:w-[48%]">
-          <div className="absolute right-0 top-0 size-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-brand-cyan/15 blur-3xl" />
-          <div className="absolute bottom-0 left-0 size-64 -translate-x-1/3 translate-y-1/3 rounded-full bg-brand-lime/20 blur-3xl" />
-          <LoginForm />
+        <div className="relative flex w-full flex-col items-center overflow-x-hidden overflow-y-auto bg-brand-cyan-soft/50 lg:w-[48%] lg:justify-center lg:p-8">
+          {/* Mobile brand panel ? same look as desktop left side */}
+          <div className="relative w-full overflow-hidden bg-brand-navy-deep px-5 pb-10 pt-8 lg:hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-navy-deep via-brand-navy to-cyan-950" />
+            <div className="absolute -left-16 -top-16 size-48 rounded-full bg-brand-cyan/25 blur-3xl" />
+            <div className="absolute -bottom-20 -right-10 size-52 rounded-full bg-brand-lime/15 blur-3xl" />
+            <div className="brand-grid absolute inset-0 opacity-20" />
+            <div className="relative z-10 flex flex-col items-center text-center">
+              <div className="mb-5 flex items-center gap-2 text-[10px] font-medium uppercase tracking-widest text-cyan-50/70">
+                <span className="size-2 rounded-full bg-brand-lime shadow-lg shadow-brand-lime/40" />
+                BENRO Workspace
+              </div>
+              <BrandLogo mobile />
+              <p className="mt-3 max-w-xs text-xs text-cyan-50/55">
+                Secure real estate operations in one place
+              </p>
+            </div>
+          </div>
+
+          <div className="relative w-full flex-1 px-5 pb-8 pt-6 sm:px-8 sm:pt-8 lg:flex lg:items-center lg:justify-center lg:p-0">
+            <div className="pointer-events-none absolute right-0 top-0 size-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-brand-cyan/15 blur-3xl" />
+            <div className="pointer-events-none absolute bottom-0 left-0 size-64 -translate-x-1/3 translate-y-1/3 rounded-full bg-brand-lime/20 blur-3xl" />
+            <LoginForm />
+          </div>
         </div>
       </div>
       <Toaster position="top-right" />

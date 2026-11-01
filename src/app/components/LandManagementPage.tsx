@@ -555,7 +555,7 @@ export function LandManagementPage({ onLogout, onNavigate, currentUser }: LandMa
               </Select>
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => resetForm()}>
+                  <Button className="bg-brand-navy text-white hover:bg-brand-navy-deep" onClick={() => resetForm()}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Land Listing
                   </Button>
@@ -572,7 +572,7 @@ export function LandManagementPage({ onLogout, onNavigate, currentUser }: LandMa
                     <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                       Cancel
                     </Button>
-                    <Button onClick={handleAddListing} className="bg-blue-600 hover:bg-blue-700">
+                    <Button onClick={handleAddListing} className="bg-brand-navy text-white hover:bg-brand-navy-deep">
                       Add Listing
                     </Button>
                   </DialogFooter>
@@ -755,7 +755,7 @@ export function LandManagementPage({ onLogout, onNavigate, currentUser }: LandMa
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleEditListing} className="bg-blue-600 hover:bg-blue-700">
+              <Button onClick={handleEditListing} className="bg-brand-navy text-white hover:bg-brand-navy-deep">
                 Save Changes
               </Button>
             </DialogFooter>

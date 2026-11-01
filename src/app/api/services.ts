@@ -12,6 +12,8 @@ export const authApi = {
   login: (email: string, password: string) =>
     api.post<LoginResponse>("/auth/login", { email, password }),
   me: () => api.get<{ user: UserRole }>("/auth/me"),
+  updateProfile: (data: Partial<UserRole>) =>
+    api.put<{ user: UserRole }>("/auth/me", data),
   changePassword: (currentPassword: string, newPassword: string) =>
     api.post("/auth/change-password", { currentPassword, newPassword }),
 };
@@ -78,8 +80,13 @@ export const advertisementsApi = {
 };
 
 export const documentsApi = {
-  list: (apartmentId?: string) =>
-    api.get<any[]>(apartmentId ? `/documents?apartmentId=${apartmentId}` : "/documents"),
+  list: (opts?: { apartmentId?: string; tenantId?: string }) => {
+    const params = new URLSearchParams();
+    if (opts?.apartmentId) params.set("apartmentId", opts.apartmentId);
+    if (opts?.tenantId) params.set("tenantId", opts.tenantId);
+    const q = params.toString();
+    return api.get<any[]>(`/documents${q ? `?${q}` : ""}`);
+  },
   create: (formData: FormData) => api.upload("/documents", formData),
   createJson: (data: any) => api.post("/documents", data),
   update: (id: string, data: any) => api.put(`/documents/${id}`, data),
@@ -133,4 +140,89 @@ export const uploadsApi = {
 
 export const dashboardApi = {
   summary: () => api.get<any>("/dashboard/summary"),
+};
+
+export type CompanySettings = {
+  id?: string;
+  companyName: string;
+  logoUrl: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  country: string;
+  phone: string;
+  email: string;
+  website: string;
+  taxId: string;
+  bankName: string;
+  bankAccountName: string;
+  bankAccountNumber: string;
+  bankBranch: string;
+  paymentInstructions: string;
+  invoicePrefix: string;
+  currency: string;
+  currencySymbol: string;
+  invoiceTemplateUrl?: string;
+};
+
+export type InvoiceItem = {
+  description: string;
+  category?: string;
+  quantity: number;
+  unitPrice: number;
+  amount: number;
+};
+
+export type InvoiceRecord = {
+  id: string;
+  invoiceNumber: string;
+  customerId: string;
+  apartmentId?: string;
+  tenantId: string;
+  tenantName: string;
+  tenantEmail?: string;
+  tenantPhone?: string;
+  unit: string;
+  periodLabel?: string;
+  issueDate: string;
+  dueDate?: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  total: number;
+  currency: string;
+  status: "draft" | "sent" | "paid" | "overdue" | "cancelled";
+  notes?: string;
+  sentAt?: string;
+  createdAt?: string;
+};
+
+export const companySettingsApi = {
+  get: () => api.get<CompanySettings>("/settings/company"),
+  update: (data: Partial<CompanySettings>) =>
+    api.put<CompanySettings>("/settings/company", data),
+};
+
+export const invoicesApi = {
+  list: (opts?: { apartmentId?: string; tenantId?: string; status?: string }) => {
+    const params = new URLSearchParams();
+    if (opts?.apartmentId) params.set("apartmentId", opts.apartmentId);
+    if (opts?.tenantId) params.set("tenantId", opts.tenantId);
+    if (opts?.status) params.set("status", opts.status);
+    const q = params.toString();
+    return api.get<InvoiceRecord[]>(`/invoices${q ? `?${q}` : ""}`);
+  },
+  get: (id: string) => api.get<InvoiceRecord>(`/invoices/${id}`),
+  create: (data: any) => api.post<InvoiceRecord>("/invoices", data),
+  bulk: (data: any) =>
+    api.post<{ count: number; invoices: InvoiceRecord[] }>("/invoices/bulk", data),
+  update: (id: string, data: any) => api.put<InvoiceRecord>(`/invoices/${id}`, data),
+  send: (id: string) => api.post<InvoiceRecord>(`/invoices/${id}/send`, {}),
+  sendBulk: (ids: string[]) => api.post("/invoices/send-bulk", { ids }),
+  remove: (id: string) => api.delete(`/invoices/${id}`),
+  filledPdfUrl: (id: string) => {
+    const base =
+      (import.meta as ImportMeta & { env: Record<string, string> }).env?.VITE_API_URL ||
+      "http://localhost:5000/api";
+    return `${base}/invoices/${id}/filled-pdf`;
+  },
 };

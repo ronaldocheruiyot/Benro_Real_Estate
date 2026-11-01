@@ -240,7 +240,7 @@ export function InspectionsPage({
   const getStatusBadge = (status: InspectionStatus) => {
     switch (status) {
       case "scheduled":
-        return <Badge className="bg-blue-100 text-blue-700 border-blue-200"><Calendar className="h-3 w-3 mr-1" /> Scheduled</Badge>;
+        return <Badge className="bg-blue-100 text-brand-navy border-blue-200"><Calendar className="h-3 w-3 mr-1" /> Scheduled</Badge>;
       case "in_progress":
         return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200"><ClipboardCheck className="h-3 w-3 mr-1" /> In Progress</Badge>;
       case "completed":
@@ -252,7 +252,7 @@ export function InspectionsPage({
     const colors = {
       move_in: "bg-purple-100 text-purple-700 border-purple-200",
       move_out: "bg-orange-100 text-orange-700 border-orange-200",
-      routine: "bg-blue-100 text-blue-700 border-blue-200",
+      routine: "bg-blue-100 text-brand-navy border-blue-200",
       emergency: "bg-red-100 text-red-700 border-red-200",
     };
     return <Badge className={colors[type]}>{type.replace("_", " ").toUpperCase()}</Badge>;
@@ -282,7 +282,7 @@ export function InspectionsPage({
           
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-blue-500 hover:bg-blue-600">
+              <Button className="bg-brand-navy text-white hover:bg-brand-navy-deep">
                 <Plus className="h-4 w-4 mr-2" />
                 Schedule Inspection
               </Button>
@@ -365,7 +365,7 @@ export function InspectionsPage({
                 )}
 
                 <Button 
-                  className="w-full bg-blue-500 hover:bg-blue-600"
+                  className="w-full bg-brand-navy text-white hover:bg-brand-navy-deep"
                   onClick={handleCreateInspection}
                 >
                   Schedule Inspection
@@ -578,7 +578,7 @@ function InspectionsTable({
                   <Button 
                     size="sm" 
                     onClick={() => onStart(inspection.id)}
-                    className="bg-blue-500 hover:bg-blue-600"
+                    className="bg-brand-navy text-white hover:bg-brand-navy-deep"
                   >
                     Start
                   </Button>

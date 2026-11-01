@@ -223,7 +223,7 @@ Don't miss this opportunity to make this wonderful property your new home. Sched
                     {selectedAmenities.map((amenity) => (
                       <span
                         key={amenity}
-                        className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm"
+                        className="px-3 py-1 bg-brand-cyan-soft text-brand-navy rounded-full text-sm"
                       >
                         {amenity}
                       </span>
@@ -433,7 +433,7 @@ Don't miss this opportunity to make this wonderful property your new home. Sched
             )}
             
             {imageUrls.length === 0 && (
-              <p className="text-sm text-blue-700 bg-blue-50 p-2 rounded">
+              <p className="text-sm text-brand-navy bg-blue-50 p-2 rounded">
                 📸 Add at least 1 image to continue. Maximum {MAX_IMAGES} images allowed.
               </p>
             )}
@@ -455,7 +455,7 @@ Don't miss this opportunity to make this wonderful property your new home. Sched
                       <X className="h-4 w-4" />
                     </button>
                     {index === 0 && (
-                      <div className="absolute bottom-2 left-2 bg-blue-600 text-white px-2 py-1 rounded text-xs">
+                      <div className="absolute bottom-2 left-2 bg-brand-navy text-white px-2 py-1 rounded text-xs">
                         Main
                       </div>
                     )}

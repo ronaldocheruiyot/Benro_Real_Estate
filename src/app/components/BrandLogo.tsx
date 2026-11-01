@@ -10,9 +10,11 @@ import logoImage from "../../../assets/benro-logo.png";
 
 interface BrandLogoProps {
   compact?: boolean;
+  /** Smaller hero for mobile login banner */
+  mobile?: boolean;
 }
 
-export function BrandLogo({ compact = false }: BrandLogoProps) {
+export function BrandLogo({ compact = false, mobile = false }: BrandLogoProps) {
   const reduceMotion = useReducedMotion();
   const pointerX = useMotionValue(50);
   const pointerY = useMotionValue(50);
@@ -59,10 +61,14 @@ export function BrandLogo({ compact = false }: BrandLogoProps) {
       initial={reduceMotion ? false : { opacity: 0, scale: 0.92 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.7, ease: "easeOut" }}
-      className="relative z-10 flex max-w-xl flex-col items-center px-12 text-center"
+      className={`relative z-10 flex max-w-xl flex-col items-center text-center ${
+        mobile ? "px-4" : "px-12"
+      }`}
     >
       <div
-        className="relative flex size-96 items-center justify-center"
+        className={`relative flex items-center justify-center ${
+          mobile ? "size-56 sm:size-64" : "size-96"
+        }`}
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
       >
@@ -94,7 +100,9 @@ export function BrandLogo({ compact = false }: BrandLogoProps) {
             rotateY: reduceMotion ? 0 : rotateY,
             transformPerspective: 900,
           }}
-          className="relative flex w-80 transform-gpu items-center justify-center overflow-hidden rounded-3xl border border-white/15 bg-white/95 px-7 py-8 shadow-2xl shadow-black/30 backdrop-blur"
+          className={`relative flex transform-gpu items-center justify-center overflow-hidden rounded-3xl border border-white/15 bg-white/95 shadow-2xl shadow-black/30 backdrop-blur ${
+            mobile ? "w-48 px-4 py-5 sm:w-56" : "w-80 px-7 py-8"
+          }`}
         >
           <div className="absolute inset-x-10 -bottom-6 h-12 rounded-full bg-brand-cyan/25 blur-2xl" />
           <img
@@ -127,14 +135,20 @@ export function BrandLogo({ compact = false }: BrandLogoProps) {
         initial={reduceMotion ? false : { opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.55, ease: "easeOut" }}
-        className="-mt-4 space-y-3"
+        className={`space-y-3 ${mobile ? "-mt-2" : "-mt-4"}`}
       >
-        <div className="text-2xl font-medium tracking-tight text-white">
+        <div
+          className={`font-medium tracking-tight text-white ${
+            mobile ? "text-lg" : "text-2xl"
+          }`}
+        >
           Property management, simplified.
         </div>
-        <p className="mx-auto max-w-md text-sm leading-6 text-cyan-50/70">
-          One secure workspace for properties, tenants, payments, and your entire team.
-        </p>
+        {!mobile && (
+          <p className="mx-auto max-w-md text-sm leading-6 text-cyan-50/70">
+            One secure workspace for properties, tenants, payments, and your entire team.
+          </p>
+        )}
       </motion.div>
     </motion.div>
   );

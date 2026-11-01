@@ -104,7 +104,7 @@ export function EditPermissionsDialog({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-blue-600" />
+            <Shield className="h-5 w-5 text-brand-cyan" />
             Edit Permissions - {user.name}
           </DialogTitle>
           <DialogDescription>
@@ -197,8 +197,8 @@ export function EditPermissionsDialog({
           )}
 
           {/* Summary */}
-          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 className="text-blue-900 mb-2">📋 Permission Summary</h4>
+          <div className="p-4 bg-brand-cyan-soft rounded-lg border border-brand-cyan/30">
+            <h4 className="text-brand-navy mb-2">📋 Permission Summary</h4>
             <div className="text-sm text-blue-800 space-y-1">
               <p>
                 <strong>Active Permissions:</strong>{" "}

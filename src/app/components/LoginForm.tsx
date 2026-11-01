@@ -3,7 +3,6 @@ import { motion } from "motion/react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { BrandLogo } from "./BrandLogo";
 import { Eye, EyeOff, User, Shield, Wrench, Calculator, ArrowRight, LockKeyhole, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { useAppData } from "../context/AppDataContext";
@@ -60,10 +59,6 @@ export function LoginForm() {
       transition={{ duration: 0.6, delay: 0.3 }}
       className="relative w-full max-w-lg"
     >
-      <div className="mb-7 lg:hidden">
-        <BrandLogo compact />
-      </div>
-
       <div className="rounded-3xl border border-white/80 bg-white/95 p-6 shadow-2xl shadow-brand-navy/10 backdrop-blur sm:p-10">
         <div className="mb-8">
           <div className="mb-2 text-3xl font-semibold tracking-tight text-brand-navy">Welcome back</div>

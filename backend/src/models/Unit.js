@@ -17,8 +17,9 @@ const unitSchema = new mongoose.Schema(
     unitNumber: { type: String, required: true, trim: true },
     unitType: {
       type: String,
-      enum: ["3-bedroom", "2-bedroom", "1-bedroom", "bedsitter", "studio"],
       required: true,
+      trim: true,
+      maxlength: 80,
     },
     baseRent: { type: Number, required: true, min: 0 },
     charges: { type: [chargeSchema], default: [] },

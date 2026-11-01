@@ -23,6 +23,8 @@ import landRoutes from "./routes/lands.js";
 import uploadRoutes from "./routes/uploads.js";
 import notificationRoutes from "./routes/notifications.js";
 import dashboardRoutes from "./routes/dashboard.js";
+import settingsRoutes from "./routes/settings.js";
+import invoiceRoutes from "./routes/invoices.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -75,6 +77,8 @@ app.use("/api/lands", landRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/settings", settingsRoutes);
+app.use("/api/invoices", invoiceRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);

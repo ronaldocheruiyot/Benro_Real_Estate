@@ -40,25 +40,25 @@ export function HelpSupportPage({ onLogout, onNavigate, currentUser }: HelpSuppo
 
   const contactMethods = [
     {
-      icon: <Mail className="size-6 text-blue-600" />,
+      icon: <Mail className="size-6 text-brand-cyan" />,
       title: "Email Support",
       description: "support@propertymanager.com",
       action: "Send Email",
     },
     {
-      icon: <Phone className="size-6 text-blue-600" />,
+      icon: <Phone className="size-6 text-brand-cyan" />,
       title: "Phone Support",
       description: "+1 (555) 123-4567",
       action: "Call Now",
     },
     {
-      icon: <MessageCircle className="size-6 text-blue-600" />,
+      icon: <MessageCircle className="size-6 text-brand-cyan" />,
       title: "Live Chat",
       description: "Available 9am - 5pm EST",
       action: "Start Chat",
     },
     {
-      icon: <Book className="size-6 text-blue-600" />,
+      icon: <Book className="size-6 text-brand-cyan" />,
       title: "Documentation",
       description: "Browse our knowledge base",
       action: "View Docs",
@@ -151,7 +151,7 @@ export function HelpSupportPage({ onLogout, onNavigate, currentUser }: HelpSuppo
                     rows={6}
                   />
                 </div>
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                <Button type="submit" className="bg-brand-navy text-white hover:bg-brand-navy-deep">
                   Send Message
                 </Button>
               </form>

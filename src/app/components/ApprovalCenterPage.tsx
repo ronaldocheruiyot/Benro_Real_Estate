@@ -113,7 +113,7 @@ export function ApprovalCenterPage({
 
   const getTypeBadge = (type: ApprovalItem["type"]) => {
     const colors = {
-      property: "bg-blue-100 text-blue-700",
+      property: "bg-blue-100 text-brand-navy",
       tenant: "bg-green-100 text-green-700",
       landlord: "bg-purple-100 text-purple-700",
       advertisement: "bg-orange-100 text-orange-700",
@@ -275,7 +275,7 @@ export function ApprovalCenterPage({
                   <p className="text-neutral-600 mb-1">Total Items</p>
                   <p className="text-neutral-900">{approvalItems.length}</p>
                 </div>
-                <DollarSign className="h-8 w-8 text-blue-600" />
+                <DollarSign className="h-8 w-8 text-brand-cyan" />
               </div>
             </CardContent>
           </Card>
@@ -322,8 +322,8 @@ export function ApprovalCenterPage({
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h4 className="text-blue-900 mb-2">✅ Approval Authority</h4>
+              <div className="p-4 bg-brand-cyan-soft rounded-lg">
+                <h4 className="text-brand-navy mb-2">✅ Approval Authority</h4>
                 <ul className="text-sm text-blue-800 space-y-1">
                   <li>• Landlord onboarding and property listings</li>
                   <li>• Tenant allocation and account activation</li>

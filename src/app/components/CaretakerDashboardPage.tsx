@@ -732,12 +732,12 @@ export function CaretakerDashboardPage({ onLogout, onNavigate, currentUser }: Ca
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <Users className="h-4 w-4 text-blue-600" />
+                  <Users className="h-4 w-4 text-brand-cyan" />
                   Total Tenants
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-blue-600">{tenants.length}</div>
+                <div className="text-3xl font-bold text-brand-cyan">{tenants.length}</div>
                 <p className="text-xs text-neutral-600 mt-1">Active residents</p>
               </CardContent>
             </Card>
@@ -1182,7 +1182,7 @@ export function CaretakerDashboardPage({ onLogout, onNavigate, currentUser }: Ca
                     <CardTitle className="text-sm">Total Units</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold text-blue-600">{propertyUnits.length}</div>
+                    <div className="text-3xl font-bold text-brand-cyan">{propertyUnits.length}</div>
                     <p className="text-xs text-neutral-600 mt-1">All properties</p>
                   </CardContent>
                 </Card>
@@ -1333,10 +1333,10 @@ export function CaretakerDashboardPage({ onLogout, onNavigate, currentUser }: Ca
                     <button
                       type="button"
                       onClick={() => setConductInspectionOpen(true)}
-                      className="flex items-start gap-4 p-4 border-2 border-neutral-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
+                      className="flex items-start gap-4 p-4 border-2 border-neutral-200 rounded-lg hover:border-brand-cyan hover:bg-brand-cyan-soft transition-all text-left group"
                     >
                       <div className="p-3 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
-                        <ClipboardList className="h-6 w-6 text-blue-600" />
+                        <ClipboardList className="h-6 w-6 text-brand-cyan" />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-neutral-900">Conduct Inspection</h3>
@@ -1410,7 +1410,7 @@ export function CaretakerDashboardPage({ onLogout, onNavigate, currentUser }: Ca
                                 "bg-red-100"
                               }`}>
                                 {operation.type === "maintenance" && <Wrench className="h-5 w-5 text-orange-600" />}
-                                {operation.type === "inspection" && <ClipboardList className="h-5 w-5 text-blue-600" />}
+                                {operation.type === "inspection" && <ClipboardList className="h-5 w-5 text-brand-cyan" />}
                                 {operation.type === "reading" && <Zap className="h-5 w-5 text-green-600" />}
                                 {operation.type === "incident" && <AlertTriangle className="h-5 w-5 text-red-600" />}
                               </div>
@@ -1420,7 +1420,7 @@ export function CaretakerDashboardPage({ onLogout, onNavigate, currentUser }: Ca
                                   <h4 className="font-semibold">{operation.title}</h4>
                                   <Badge className={
                                     operation.type === "maintenance" ? "bg-orange-100 text-orange-700" :
-                                    operation.type === "inspection" ? "bg-blue-100 text-blue-700" :
+                                    operation.type === "inspection" ? "bg-blue-100 text-brand-navy" :
                                     operation.type === "reading" ? "bg-green-100 text-green-700" :
                                     "bg-red-100 text-red-700"
                                   }>
@@ -1483,7 +1483,7 @@ export function CaretakerDashboardPage({ onLogout, onNavigate, currentUser }: Ca
                             {/* Status Badge */}
                             <Badge className={
                               operation.status === "completed" ? "bg-green-100 text-green-700" :
-                              operation.status === "reviewed" ? "bg-blue-100 text-blue-700" :
+                              operation.status === "reviewed" ? "bg-blue-100 text-brand-navy" :
                               "bg-yellow-100 text-yellow-700"
                             }>
                               {operation.status.toUpperCase()}
@@ -1590,7 +1590,7 @@ export function CaretakerDashboardPage({ onLogout, onNavigate, currentUser }: Ca
                   {uploadedFiles.map((file, index) => (
                     <div key={index} className="flex items-center justify-between bg-neutral-50 p-2 rounded">
                       <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-blue-600" />
+                        <FileText className="h-4 w-4 text-brand-cyan" />
                         <span className="text-sm">{file.name}</span>
                         <span className="text-xs text-neutral-500">
                           ({(file.size / 1024).toFixed(1)} KB)

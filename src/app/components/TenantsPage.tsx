@@ -5,7 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { ArrowLeft, Mail, Plus, DollarSign, Home, UserX, Users, ArrowRight, AlertCircle, Settings } from "lucide-react";
 import { Apartment } from "./ApartmentCard";
-import { AddTenantDialog } from "./AddTenantDialog";
+import { AddTenantDialog, type NewTenantPayload } from "./AddTenantDialog";
+import { tenantsApi, documentsApi, paymentsApi } from "../api/services";
+import { useAppData } from "../context/AppDataContext";
+import { toast } from "sonner";
 
 interface TenantsPageProps {
   onLogout: () => void;
@@ -33,6 +36,8 @@ export interface Tenant {
   status: "active" | "left" | "vacant";
   idNumber: string;
   birthDate: string;
+  deposit?: number;
+  firstMonthPay?: number;
   numberOfRooms?: number;
   waterUnits?: number;
   leftReason?: string;
@@ -40,6 +45,7 @@ export interface Tenant {
   hasAccount?: boolean;
   username?: string;
   password?: string;
+  apartmentId?: string;
 }
 
 export interface Payment {
@@ -172,12 +178,66 @@ export function TenantsPage({
 
   const totalPaid = paidTenants.reduce((sum, tenant) => sum + tenant.rentAmount, 0);
 
-  const handleAddTenant = (tenantData: Omit<Tenant, "id">) => {
-    const newTenant: Tenant = {
-      id: Date.now().toString(),
-      ...tenantData,
-    };
-    setTenants([...tenants, newTenant]);
+  const { refreshAll } = useAppData();
+
+  const handleAddTenant = async (tenantData: NewTenantPayload) => {
+    if (!apartment?.id) {
+      toast.error("Select an apartment first");
+      throw new Error("No apartment selected");
+    }
+
+    const { documents = [], ...rest } = tenantData;
+    const created = await tenantsApi.create({
+      ...rest,
+      apartmentId: apartment.id,
+      paymentStatus: rest.paymentStatus || "unpaid",
+    });
+
+    for (const file of documents) {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("name", file.name);
+      fd.append("category", "id");
+      fd.append("uploadFolder", "documents");
+      fd.append("tenantId", created.id);
+      fd.append("apartmentId", apartment.id);
+      await documentsApi.create(fd);
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+    if ((rest.deposit || 0) > 0) {
+      await paymentsApi.create({
+        tenantId: created.id,
+        tenantName: created.name,
+        unit: created.unit,
+        amount: rest.deposit!,
+        date: today,
+        method: "cash",
+        status: "claimed",
+        notes: "Security deposit",
+        apartmentId: apartment.id,
+      } as any);
+    }
+    if ((rest.firstMonthPay || 0) > 0) {
+      await paymentsApi.create({
+        tenantId: created.id,
+        tenantName: created.name,
+        unit: created.unit,
+        amount: rest.firstMonthPay!,
+        date: today,
+        method: "cash",
+        status: "claimed",
+        notes: "First month rent",
+        apartmentId: apartment.id,
+      } as any);
+    }
+
+    await refreshAll();
+    toast.success("Tenant added", {
+      description: documents.length
+        ? `${documents.length} document(s) uploaded`
+        : "Profile saved to database",
+    });
   };
 
   const handleEmailAll = () => {
@@ -194,15 +254,15 @@ export function TenantsPage({
       <Navigation onLogout={onLogout} onNavigate={onNavigate} currentView="tenants" />
 
       <div className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto p-8">
+        <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
           {/* No Apartment Selected Warning */}
           {!apartment && (
             <div className="flex items-center justify-center min-h-[60vh]">
               <Card className="max-w-2xl w-full">
                 <CardContent className="pt-6">
                   <div className="text-center py-8">
-                    <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                      <Home className="h-8 w-8 text-blue-600" />
+                    <div className="mx-auto w-16 h-16 bg-brand-cyan-soft rounded-full flex items-center justify-center mb-4">
+                      <Home className="h-8 w-8 text-brand-cyan" />
                     </div>
                     <h2 className="mb-2">No Apartment Selected</h2>
                     <p className="text-neutral-600 mb-6">
@@ -210,7 +270,7 @@ export function TenantsPage({
                     </p>
                     <Button
                       onClick={() => onNavigate("houses")}
-                      className="bg-blue-600 hover:bg-blue-700 gap-2"
+                      className="bg-brand-navy text-white hover:bg-brand-navy-deep gap-2"
                     >
                       <Home className="size-4" />
                       Go to Houses Page
@@ -225,7 +285,7 @@ export function TenantsPage({
           {apartment && (
             <>
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <Button
               variant="outline"
               onClick={onBack}
@@ -234,36 +294,38 @@ export function TenantsPage({
               <ArrowLeft className="size-4" />
               Back to Houses
             </Button>
-            <div className="flex items-center justify-between">
-              <div>
-                <h1>Tenants for {apartment.name}</h1>
-                <p className="text-neutral-600 mt-1">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <h1 className="break-words text-xl sm:text-2xl lg:text-3xl">
+                  Tenants for {apartment.name}
+                </h1>
+                <p className="mt-1 text-sm text-neutral-600 sm:text-base">
                   Manage tenants and track payments
                 </p>
               </div>
               {hasUnitsConfigured && (
-                <div className="flex gap-3">
+                <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-end sm:gap-3">
                   <Button
                     variant="outline"
                     onClick={() => onNavigateToSubPage("tenantsByApartment")}
-                    className="gap-2"
+                    className="w-full justify-center gap-2 sm:w-auto"
                   >
-                    <Users className="size-4" />
+                    <Users className="size-4 shrink-0" />
                     View by Property
                   </Button>
                   <Button
                     variant="outline"
                     onClick={handleEmailAll}
-                    className="gap-2"
+                    className="w-full justify-center gap-2 sm:w-auto"
                   >
-                    <Mail className="size-4" />
+                    <Mail className="size-4 shrink-0" />
                     Email All Tenants
                   </Button>
                   <Button
                     onClick={() => setIsAddDialogOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 gap-2"
+                    className="w-full justify-center gap-2 bg-brand-navy text-white hover:bg-brand-navy-deep sm:w-auto"
                   >
-                    <Plus className="size-5" />
+                    <Plus className="size-5 shrink-0" />
                     Add Tenant
                   </Button>
                 </div>
@@ -305,11 +367,11 @@ export function TenantsPage({
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-muted-foreground mb-1">Active Tenants</p>
-                      <p className="text-blue-600">{activeTenants.length}</p>
+                      <p className="text-brand-cyan">{activeTenants.length}</p>
                     </div>
-                    <Users className="size-8 text-blue-600" />
+                    <Users className="size-8 text-brand-cyan" />
                   </div>
-                  <div className="flex items-center gap-1 mt-2 text-blue-600">
+                  <div className="flex items-center gap-1 mt-2 text-brand-cyan">
                     <span className="text-sm">View All</span>
                     <ArrowRight className="size-4" />
                   </div>
@@ -390,15 +452,15 @@ export function TenantsPage({
                   className="w-full flex items-center justify-between p-3 hover:bg-neutral-50 rounded-lg transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Home className="size-5 text-blue-600" />
+                    <div className="p-2 bg-brand-cyan-soft rounded-lg">
+                      <Home className="size-5 text-brand-cyan" />
                     </div>
                     <div className="text-left">
                       <p>Units Management</p>
                       <p className="text-muted-foreground">Manage properties, rent, and charges</p>
                     </div>
                   </div>
-                  <ArrowRight className="size-5 text-blue-600" />
+                  <ArrowRight className="size-5 text-brand-cyan" />
                 </button>
               </CardContent>
             </Card>
@@ -450,7 +512,7 @@ export function TenantsPage({
           <div className="bg-white rounded-lg border p-6">
             <h3 className="mb-4">Quick Overview</h3>
             <div className="space-y-4">
-              <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
+              <div className="flex justify-between items-center p-4 bg-brand-cyan-soft rounded-lg">
                 <span>Total Units</span>
                 <span>{activeTenants.length + vacantUnits.length}</span>
               </div>

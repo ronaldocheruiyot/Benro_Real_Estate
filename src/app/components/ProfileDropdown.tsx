@@ -75,7 +75,7 @@ export function ProfileDropdown({ onLogout, onNavigate, currentUser }: ProfileDr
               <p className="text-muted-foreground truncate">{userInfo.email}</p>
             </div>
           </div>
-          <div className="mt-3 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-md inline-block">
+          <div className="mt-3 px-3 py-1.5 bg-brand-cyan-soft text-brand-navy rounded-md inline-block">
             {userInfo.role}
           </div>
         </div>

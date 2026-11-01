@@ -253,7 +253,7 @@ export function CreateTenantAccountDialog({
               </Button>
               <Button
                 type="submit"
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                className="flex-1 bg-brand-navy text-white hover:bg-brand-navy-deep"
               >
                 Create Account
               </Button>

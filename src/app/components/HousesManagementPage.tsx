@@ -112,11 +112,11 @@ export function HousesManagementPage({
         </div>
 
         {/* Info Alert */}
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+        <div className="mb-6 p-4 bg-brand-cyan-soft border border-brand-cyan/30 rounded-lg flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 text-brand-cyan mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-blue-900 mb-1">Manage Your Properties</p>
-            <p className="text-blue-700">
+            <p className="text-brand-navy mb-1">Manage Your Properties</p>
+            <p className="text-brand-navy">
               Add all your houses/properties here, then configure units for each one. Units define the individual rental spaces (apartments, rooms, etc.) within each property.
             </p>
           </div>
@@ -131,8 +131,8 @@ export function HousesManagementPage({
                   <p className="text-neutral-600 mb-1">Total Properties</p>
                   <p className="text-neutral-900">{stats.total}</p>
                 </div>
-                <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Building2 className="h-6 w-6 text-blue-600" />
+                <div className="h-12 w-12 bg-brand-cyan-soft rounded-lg flex items-center justify-center">
+                  <Building2 className="h-6 w-6 text-brand-cyan" />
                 </div>
               </div>
             </CardContent>
@@ -219,7 +219,7 @@ export function HousesManagementPage({
                   <div className="flex gap-2">
                     <Button
                       variant="default"
-                      className="flex-1 bg-blue-600 hover:bg-blue-700"
+                      className="flex-1 bg-brand-navy text-white hover:bg-brand-navy-deep"
                       onClick={() => onConfigureUnits(apartment)}
                     >
                       <Settings className="mr-2 h-4 w-4" />
@@ -305,9 +305,16 @@ export function HousesManagementPage({
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Property</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{apartmentToDelete?.name}"? This action cannot be undone and will remove all associated units and tenant data.
+            <AlertDialogTitle>Delete this property?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <span className="block">
+                You are about to permanently delete{" "}
+                <strong>“{apartmentToDelete?.name}”</strong>.
+              </span>
+              <span className="block text-red-700">
+                This can remove linked units, tenants, payments, and documents. This action
+                cannot be undone.
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

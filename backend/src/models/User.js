@@ -38,6 +38,8 @@ const userSchema = new mongoose.Schema(
     assignedProperties: [{ type: mongoose.Schema.Types.ObjectId, ref: "Apartment" }],
     lastLogin: { type: String },
     avatar: { type: String, default: "" },
+    phone: { type: String, default: "" },
+    address: { type: String, default: "" },
   },
   { timestamps: { createdAt: "createdDate", updatedAt: true } }
 );

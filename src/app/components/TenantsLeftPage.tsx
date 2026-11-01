@@ -121,7 +121,7 @@ export function TenantsLeftPage({
                     <Button
                       size="sm"
                       onClick={() => handleReturnTenant(tenant.id)}
-                      className="gap-2 bg-blue-600 hover:bg-blue-700"
+                      className="gap-2 bg-brand-navy text-white hover:bg-brand-navy-deep"
                     >
                       <UserPlus className="size-4" />
                       Return Tenant

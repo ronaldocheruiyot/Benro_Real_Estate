@@ -106,7 +106,7 @@ export function TenantDashboardPage({
                   <p className="text-neutral-600 mb-1">Current Balance</p>
                   <p className="text-neutral-900">${accountBalance.total}</p>
                 </div>
-                <DollarSign className="h-8 w-8 text-blue-600" />
+                <DollarSign className="h-8 w-8 text-brand-cyan" />
               </div>
             </CardContent>
           </Card>
@@ -210,7 +210,7 @@ export function TenantDashboardPage({
                 <span className="font-medium">Total Due</span>
                 <span className="text-neutral-900">${accountBalance.total}</span>
               </div>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700">
+              <Button className="w-full bg-brand-navy text-white hover:bg-brand-navy-deep">
                 Pay Now
               </Button>
             </CardContent>
