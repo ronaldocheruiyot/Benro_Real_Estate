@@ -5,13 +5,15 @@ import { Card, CardContent } from "./ui/card";
 import { Input } from "./ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
-import { ArrowLeft, Search, Mail, Calendar, UserMinus } from "lucide-react";
+import { ArrowLeft, Search, Mail, Calendar, UserMinus, FileText } from "lucide-react";
 import { Apartment } from "./ApartmentCard";
 import { Tenant, Payment, ActivityLog } from "./TenantsPage";
 import { TenantDetailDialog } from "./TenantDetailDialog";
 import { SetDeadlineDialog } from "./SetDeadlineDialog";
 import { MarkAsLeftDialog } from "./MarkAsLeftDialog";
 import { CashBillingDialog } from "./CashBillingDialog";
+import { TenantInvoiceDialog } from "./TenantInvoiceDialog";
+import { Unit } from "./UnitsPage";
 
 interface ActiveTenantsPageProps {
   onLogout: () => void;
@@ -25,6 +27,7 @@ interface ActiveTenantsPageProps {
   activityLogs: ActivityLog[];
   setActivityLogs: (logs: ActivityLog[]) => void;
   currentUser: { id: string; name: string; email: string };
+  units?: Unit[];
 }
 
 export function ActiveTenantsPage({ 
@@ -38,13 +41,22 @@ export function ActiveTenantsPage({
   setPayments,
   activityLogs,
   setActivityLogs,
-  currentUser
+  currentUser,
+  units = [],
 }: ActiveTenantsPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
   const [deadlineTenant, setDeadlineTenant] = useState<Tenant | null>(null);
   const [markAsLeftTenant, setMarkAsLeftTenant] = useState<Tenant | null>(null);
   const [cashBillingTenant, setCashBillingTenant] = useState<Tenant | null>(null);
+  const [invoiceTenant, setInvoiceTenant] = useState<Tenant | null>(null);
+
+  const getUnitForTenant = (tenant: Tenant) =>
+    units.find((u) => u.tenantId === tenant.id) ||
+    units.find(
+      (u) => u.unitNumber.toLowerCase() === String(tenant.unit || "").toLowerCase()
+    ) ||
+    null;
 
   const activeTenants = tenants.filter((t) => t.status === "active");
   
@@ -223,7 +235,7 @@ export function ActiveTenantsPage({
                       {tenant.paymentStatus === "paid" ? "Paid" : "Unpaid"}
                     </Badge>
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         variant="outline"
                         size="sm"
@@ -232,6 +244,15 @@ export function ActiveTenantsPage({
                       >
                         <Calendar className="size-4" />
                         Deadline
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setInvoiceTenant(tenant)}
+                        className="gap-2 text-brand-navy hover:text-brand-navy-deep"
+                      >
+                        <FileText className="size-4" />
+                        Invoice
                       </Button>
                       <Button
                         variant="outline"
@@ -311,6 +332,16 @@ export function ActiveTenantsPage({
           open={!!cashBillingTenant}
           onOpenChange={(open) => !open && setCashBillingTenant(null)}
           onAddPayment={handleAddCashPayment}
+        />
+      )}
+
+      {/* Per-tenant invoice preview + charges */}
+      {invoiceTenant && (
+        <TenantInvoiceDialog
+          tenant={invoiceTenant}
+          unit={getUnitForTenant(invoiceTenant)}
+          open={!!invoiceTenant}
+          onOpenChange={(open) => !open && setInvoiceTenant(null)}
         />
       )}
     </div>

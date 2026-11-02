@@ -308,6 +308,7 @@ function AppShell() {
             activityLogs={apartmentLogs}
             setActivityLogs={setActivityLogs}
             currentUser={currentUser}
+            units={apartmentUnits}
           />
         )}
         {currentView === "failedToPay" && selectedApartment && (
